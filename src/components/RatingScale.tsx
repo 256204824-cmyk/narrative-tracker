@@ -13,13 +13,17 @@ export default function RatingScale({ value, onChange, label }: Props) {
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
-      <View style={styles.row}>
+      <View style={styles.row} accessibilityRole="radiogroup">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
           <TouchableOpacity
             key={n}
             style={[styles.dot, value >= n ? styles.dotFilled : styles.dotEmpty]}
             onPress={() => onChange(n)}
             activeOpacity={0.7}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: value === n }}
+            // 读屏只念数字的话，用户不知道满分是多少、当前选了几分
+            accessibilityLabel={t.scale.scaleA11y(n, 10)}
           >
             <Text style={[styles.dotText, value >= n ? styles.dotTextFilled : styles.dotTextEmpty]}>
               {n}

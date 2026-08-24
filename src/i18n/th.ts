@@ -35,7 +35,10 @@ export const th: Messages = {
     },
   },
 
-  scale: { low: '1 ไม่ตรงเลย', high: '10 ตรงมาก' },
+  scale: {
+    scaleA11y: (v: number, max: number) => `${v} จาก ${max}`,
+    low: '1 ไม่ตรงเลย', high: '10 ตรงมาก'
+  },
 
   portrait: {
     onboardingTitle: 'เกี่ยวกับคุณ',
@@ -49,8 +52,8 @@ export const th: Messages = {
     textPlaceholder: 'เขียนสิ่งที่คุณคิดจริง ๆ…',
     continueToText: 'ไปต่อ',
     backOneStep: 'กลับไปคำถามก่อนหน้า',
-    incompleteTitle: 'กรุณาตอบให้ครบทุกข้อ',
-    incompleteBody: 'ทุกคำตอบช่วยให้ AI เข้าใจคุณได้ดีขึ้น',
+    incompleteTitle: 'ตอบอย่างน้อยหนึ่งข้อ',
+    incompleteBody: 'ตอบมากเท่าไรการเทียบก็ยิ่งแม่น แต่ไม่ต้องฝืน — นึกไม่ออกก็เว้นไว้ได้ และจะกลับมาประเมินใหม่เมื่อไรก็ได้',
     saveFailed: 'บันทึกไม่สำเร็จ',
     reassessSavedBody: 'บันทึกเวอร์ชันนี้แล้ว เวอร์ชันก่อนหน้ายังอยู่ครบ',
   },

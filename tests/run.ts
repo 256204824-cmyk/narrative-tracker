@@ -534,6 +534,20 @@ group('编辑 / 删除 / 崩溃兜底的文案', () => {
   }
 });
 
+// ────────────────────────────────────────────────
+group('无障碍与放宽后的画像文案', () => {
+  for (const loc of SUPPORTED_LOCALES) {
+    const m = messagesFor(loc);
+    // 读屏只念数字的话，用户不知道满分多少、当前选了几分
+    const label = m.scale.scaleA11y(7, 10);
+    ok(`${loc} 量表读屏标签含当前值`, label.includes('7'));
+    ok(`${loc} 量表读屏标签含满分`, label.includes('10'));
+    // 放宽后不该再说「所有问题」
+    ok(`${loc} 画像提示已放宽`, m.portrait.incompleteBody.length > 0);
+    ok(`${loc} 画像标题非空`, m.portrait.incompleteTitle.length > 0);
+  }
+});
+
 console.log(`\n${'═'.repeat(40)}`);
 console.log(`${passed} 通过 · ${failed} 失败`);
 if (failed > 0) process.exit(1);

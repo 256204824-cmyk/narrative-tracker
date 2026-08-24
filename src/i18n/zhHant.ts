@@ -35,7 +35,10 @@ export const zhHant: Messages = {
     },
   },
 
-  scale: { low: '1 非常不符合', high: '10 非常符合' },
+  scale: {
+    scaleA11y: (v: number, max: number) => `${max} 分制，目前 ${v} 分`,
+    low: '1 非常不符合', high: '10 非常符合'
+  },
 
   portrait: {
     onboardingTitle: '了解你自己',
@@ -49,8 +52,8 @@ export const zhHant: Messages = {
     textPlaceholder: '寫下你的真實想法...',
     continueToText: '繼續填寫',
     backOneStep: '返回上一題',
-    incompleteTitle: '請填寫所有問題',
-    incompleteBody: '每個問題都能幫助 AI 更好地理解你。',
+    incompleteTitle: '至少回答一個問題',
+    incompleteBody: '答得越多，對比越準。但不用勉強——想不出來的可以留空，以後隨時能重新評價。',
     saveFailed: '儲存失敗',
     reassessSavedBody: '這一版畫像已記錄，上一版仍然保留。',
   },

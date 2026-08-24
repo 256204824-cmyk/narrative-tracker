@@ -44,7 +44,8 @@ export default function DiagnosticsPanel({ error }: Props) {
 
   return (
     <View style={styles.wrap}>
-      <TouchableOpacity style={styles.toggle} onPress={() => setOpen(!open)}>
+      <TouchableOpacity
+            accessibilityRole="button" style={styles.toggle} onPress={() => setOpen(!open)}>
         <Text style={styles.toggleText}>
           {open ? t.diagnostics.hide : t.diagnostics.show}
         </Text>
@@ -94,7 +95,8 @@ export default function DiagnosticsPanel({ error }: Props) {
 
           <Text style={styles.hint}>{t.diagnostics.providerHint(error.baseUrl, error.model)}</Text>
 
-          <TouchableOpacity style={styles.copyBtn} onPress={copy}>
+          <TouchableOpacity
+            accessibilityRole="button" style={styles.copyBtn} onPress={copy}>
             <Text style={styles.copyText}>{t.diagnostics.copy}</Text>
           </TouchableOpacity>
         </View>

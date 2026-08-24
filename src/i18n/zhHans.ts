@@ -42,8 +42,8 @@ export const zhHans = {
     textPlaceholder: '写下你的真实想法...',
     continueToText: '继续填写',
     backOneStep: '返回上一题',
-    incompleteTitle: '请填写所有问题',
-    incompleteBody: '每个问题都能帮助 AI 更好地理解你。',
+    incompleteTitle: '至少回答一个问题',
+    incompleteBody: '答得越多，对比越准。但不用勉强——想不出来的可以留空，以后随时能重新评价。',
     saveFailed: '保存失败',
     reassessSavedBody: '这一版画像已记录，上一版仍然保留。',
   },
@@ -73,6 +73,7 @@ export const zhHans = {
   },
 
   scale: {
+    scaleA11y: (v: number, max: number) => `${max} 分制，当前 ${v} 分`,
     low: '1 非常不符合',
     high: '10 非常符合',
   },

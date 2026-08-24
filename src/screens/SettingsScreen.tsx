@@ -10,8 +10,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { File, Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import { useAppState } from '../store/AppContext';
 import { exportAllData, deleteAllData, getFactLogCount, getAllSelfPortraits } from '../database';
 import { seedDemoData } from '../dev/seed';
@@ -19,6 +17,7 @@ import { importAllData } from '../database';
 import { validateImport } from '../utils/importValidation';
 import * as DocumentPicker from 'expo-document-picker';
 import { readTextFile } from '../utils/readTextFile';
+import { saveTextFile } from '../utils/saveTextFile';
 import {
   PROVIDER_PRESETS,
   matchPreset,
@@ -222,16 +221,8 @@ export default function SettingsScreen({ onReassess }: Props) {
     try {
       const json = await exportAllData();
       const filename = `narrative_tracker_export_${today()}.json`;
-      const file = new File(Paths.document, filename);
-      await file.write(json);
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(file.uri, {
-          mimeType: 'application/json',
-          dialogTitle: t.settings.exportDialogTitle,
-        });
-      } else {
-        notify(t.settings.exportOkTitle, t.settings.exportOkBody(file.uri));
-      }
+      const where = await saveTextFile(filename, json, t.settings.exportDialogTitle);
+      notify(t.settings.exportOkTitle, t.settings.exportOkBody(where));
     } catch (err) {
       notify(t.settings.exportFailed, t.common.retry);
     } finally {
@@ -272,6 +263,7 @@ export default function SettingsScreen({ onReassess }: Props) {
               收起时显示当前生效的语言，跟随系统时把实际语言也带出来，
               否则用户只看到「跟随系统」，不知道系统被识别成了哪种语言。 */}
           <TouchableOpacity
+            accessibilityRole="button"
             style={styles.localeToggle}
             onPress={() => setLanguageOpen((v) => !v)}
           >
@@ -292,6 +284,7 @@ export default function SettingsScreen({ onReassess }: Props) {
                 const selected = localePreference === opt.locale;
                 return (
                   <TouchableOpacity
+            accessibilityRole="button"
                     key={opt.locale}
                     style={[styles.localeRow, selected && styles.localeRowSelected]}
                     onPress={async () => {
@@ -316,15 +309,33 @@ export default function SettingsScreen({ onReassess }: Props) {
           <Text style={styles.sectionDesc}>
             {t.settings.keyDesc}
           </Text>
-          {apiKey ? (
+          {apiKey && !showKeyInput ? (
             <View style={styles.keyCard}>
               <Text style={styles.keyLabel}>{t.settings.keySet}</Text>
               <Text style={styles.keyPreview}>
                 {apiKey.slice(0, 8)}...{apiKey.slice(-4)}
               </Text>
-              <TouchableOpacity style={styles.dangerBtnSmall} onPress={handleRemoveKey}>
-                <Text style={styles.dangerBtnText}>{t.settings.keyRemove}</Text>
-              </TouchableOpacity>
+              <View style={styles.keyActions}>
+                {/* 换服务商就要换 Key，先删再加会经过一个「没有 Key」的
+                    危险中间态——这时点生成报告只会得到「未设置 Key」。 */}
+                <TouchableOpacity
+                  style={styles.actionBtnSmall}
+                  onPress={() => {
+                    setKeyInput('');
+                    setShowKeyInput(true);
+                  }}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.actionBtnText}>{t.common.modify}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.dangerBtnSmall}
+                  onPress={handleRemoveKey}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.dangerBtnText}>{t.settings.keyRemove}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ) : (
             <View>
@@ -341,6 +352,7 @@ export default function SettingsScreen({ onReassess }: Props) {
                   />
                   <View style={styles.keyButtons}>
                     <TouchableOpacity
+            accessibilityRole="button"
                       style={styles.cancelBtnSmall}
                       onPress={() => {
                         setShowKeyInput(false);
@@ -349,13 +361,15 @@ export default function SettingsScreen({ onReassess }: Props) {
                     >
                       <Text style={styles.cancelBtnTextSmall}>{t.common.cancel}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.saveBtnSmall} onPress={handleSaveKey}>
+                    <TouchableOpacity
+            accessibilityRole="button" style={styles.saveBtnSmall} onPress={handleSaveKey}>
                       <Text style={styles.saveBtnTextSmall}>{t.common.save}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
               ) : (
-                <TouchableOpacity style={styles.addKeyBtn} onPress={() => setShowKeyInput(true)}>
+                <TouchableOpacity
+            accessibilityRole="button" style={styles.addKeyBtn} onPress={() => setShowKeyInput(true)}>
                   <Text style={styles.addKeyBtnText}>{t.settings.keyAdd}</Text>
                 </TouchableOpacity>
               )}
@@ -373,7 +387,8 @@ export default function SettingsScreen({ onReassess }: Props) {
           <Text style={styles.presetsLabel}>{t.settings.presetsTitle}</Text>
           <Text style={styles.presetsDesc}>{t.settings.presetsDesc}</Text>
 
-          <TouchableOpacity style={styles.localeToggle} onPress={() => setPresetsOpen((v) => !v)}>
+          <TouchableOpacity
+            accessibilityRole="button" style={styles.localeToggle} onPress={() => setPresetsOpen((v) => !v)}>
             <Text style={styles.localeCurrent}>
               {matchPreset(baseUrl)?.name ?? baseUrl}
             </Text>
@@ -387,6 +402,7 @@ export default function SettingsScreen({ onReassess }: Props) {
                 const risky = preset.policy === 'mayTrain' || preset.policy === 'unknown';
                 return (
                   <TouchableOpacity
+            accessibilityRole="button"
                     key={preset.id}
                     style={[styles.presetRow, selected && styles.localeRowSelected]}
                     onPress={() => applyPreset(preset)}
@@ -449,6 +465,7 @@ export default function SettingsScreen({ onReassess }: Props) {
 
               <View style={styles.keyButtons}>
                 <TouchableOpacity
+            accessibilityRole="button"
                   style={styles.cancelBtnSmall}
                   onPress={() => {
                     setEditingProvider(false);
@@ -460,12 +477,14 @@ export default function SettingsScreen({ onReassess }: Props) {
                 >
                   <Text style={styles.cancelBtnTextSmall}>{t.common.cancel}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.saveBtnSmall} onPress={handleSaveProvider}>
+                <TouchableOpacity
+            accessibilityRole="button" style={styles.saveBtnSmall} onPress={handleSaveProvider}>
                   <Text style={styles.saveBtnTextSmall}>{t.common.save}</Text>
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.resetBtn} onPress={handleResetProvider}>
+              <TouchableOpacity
+            accessibilityRole="button" style={styles.resetBtn} onPress={handleResetProvider}>
                 <Text style={styles.resetBtnText}>{t.settings.providerReset}</Text>
               </TouchableOpacity>
             </View>
@@ -476,6 +495,7 @@ export default function SettingsScreen({ onReassess }: Props) {
               <Text style={[styles.keyLabel, styles.providerLabelGap]}>{t.settings.modelLabel}</Text>
               <Text style={styles.providerValue}>{model}</Text>
               <TouchableOpacity
+            accessibilityRole="button"
                 style={styles.actionBtnSmall}
                 onPress={() => setEditingProvider(true)}
               >
@@ -493,7 +513,8 @@ export default function SettingsScreen({ onReassess }: Props) {
               ? t.settings.portraitDescVersions(portraits.length)
               : t.settings.portraitDescEmpty}
           </Text>
-          <TouchableOpacity style={styles.actionBtn} onPress={onReassess}>
+          <TouchableOpacity
+            accessibilityRole="button" style={styles.actionBtn} onPress={onReassess}>
             <Text style={styles.actionBtnText}>{t.settings.portraitReassess}</Text>
           </TouchableOpacity>
 
@@ -522,6 +543,7 @@ export default function SettingsScreen({ onReassess }: Props) {
           <View style={styles.tierRow}>
             {TIERS.map((tierOption) => (
               <TouchableOpacity
+            accessibilityRole="button"
                 key={tierOption.key}
                 style={[styles.tierCard, tier === tierOption.key && styles.tierCardSelected]}
                 onPress={() => setTier(tierOption.key)}
@@ -550,6 +572,7 @@ export default function SettingsScreen({ onReassess }: Props) {
             {t.settings.dataDesc(factCount)}
           </Text>
           <TouchableOpacity
+            accessibilityRole="button"
             style={styles.actionBtn}
             onPress={handleExport}
             disabled={exporting}
@@ -558,12 +581,14 @@ export default function SettingsScreen({ onReassess }: Props) {
               {exporting ? t.settings.exporting : t.settings.export}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn} onPress={handleImport} disabled={importing}>
+          <TouchableOpacity
+            accessibilityRole="button" style={styles.actionBtn} onPress={handleImport} disabled={importing}>
             <Text style={styles.actionBtnText}>
               {importing ? t.settings.importing : t.settings.import}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.dangerBtn} onPress={handleDeleteAll}>
+          <TouchableOpacity
+            accessibilityRole="button" style={styles.dangerBtn} onPress={handleDeleteAll}>
             <Text style={styles.dangerBtnTextLarge}>{t.settings.deleteAll}</Text>
           </TouchableOpacity>
         </View>
@@ -576,6 +601,7 @@ export default function SettingsScreen({ onReassess }: Props) {
               {t.settings.devDesc}
             </Text>
             <TouchableOpacity
+            accessibilityRole="button"
               style={styles.actionBtn}
               onPress={handleSeedDemo}
               disabled={seeding}
@@ -710,6 +736,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   keyLabel: { fontSize: 13, color: '#22c55e', fontWeight: '600', marginBottom: 4 },
+  keyActions: { flexDirection: 'row', gap: 10, marginTop: 12 },
   keyPreview: { fontSize: 14, color: '#333', fontFamily: 'monospace', marginBottom: 10 },
   keyInput: {
     backgroundColor: '#fff',

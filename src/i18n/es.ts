@@ -35,7 +35,10 @@ export const es: Messages = {
     },
   },
 
-  scale: { low: '1 Nada', high: '10 Totalmente' },
+  scale: {
+    scaleA11y: (v: number, max: number) => `${v} de ${max}`,
+    low: '1 Nada', high: '10 Totalmente'
+  },
 
   portrait: {
     onboardingTitle: 'Sobre ti',
@@ -49,8 +52,8 @@ export const es: Messages = {
     textPlaceholder: 'Escribe lo que piensas de verdad…',
     continueToText: 'Continuar',
     backOneStep: 'Volver a la pregunta anterior',
-    incompleteTitle: 'Responde todas las preguntas',
-    incompleteBody: 'Cada respuesta ayuda a la IA a entenderte mejor.',
+    incompleteTitle: 'Responde al menos una',
+    incompleteBody: 'Cuanto más respondas, más precisa será la comparación. Pero no te fuerces: deja en blanco lo que no se te ocurra y vuelve a evaluarte cuando quieras.',
     saveFailed: 'No se pudo guardar',
     reassessSavedBody: 'Esta versión está guardada. La anterior se conserva.',
   },

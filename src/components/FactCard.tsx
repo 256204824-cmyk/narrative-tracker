@@ -23,7 +23,13 @@ export default function FactCard({ fact, onPress }: Props) {
   const Wrapper: React.ComponentType<any> = onPress ? TouchableOpacity : View;
 
   return (
-    <Wrapper style={styles.card} onPress={onPress} activeOpacity={0.7}>
+    <Wrapper
+      style={styles.card}
+      onPress={onPress}
+      activeOpacity={0.7}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={onPress ? t.home.editTitle(fact.date) : undefined}
+    >
       <View style={styles.header}>
         <Text style={styles.date}>{fact.date}</Text>
         {tags.length > 0 && (

@@ -35,7 +35,10 @@ export const ja: Messages = {
     },
   },
 
-  scale: { low: '1 まったく当てはまらない', high: '10 とても当てはまる' },
+  scale: {
+    scaleA11y: (v: number, max: number) => `${max} 段階中 ${v}`,
+    low: '1 まったく当てはまらない', high: '10 とても当てはまる'
+  },
 
   portrait: {
     onboardingTitle: 'あなたについて',
@@ -49,8 +52,8 @@ export const ja: Messages = {
     textPlaceholder: '思っていることをそのまま…',
     continueToText: '次へ進む',
     backOneStep: '前の質問に戻る',
-    incompleteTitle: 'すべての質問にお答えください',
-    incompleteBody: 'どの答えも、AI があなたを理解する手がかりになります。',
+    incompleteTitle: '少なくとも一つ答えてください',
+    incompleteBody: '答えるほど比較は正確になりますが、無理はしないでください。思いつかなければ空欄のままで構いませんし、いつでも見直せます。',
     saveFailed: '保存できませんでした',
     reassessSavedBody: 'このバージョンを保存しました。前のバージョンも残っています。',
   },

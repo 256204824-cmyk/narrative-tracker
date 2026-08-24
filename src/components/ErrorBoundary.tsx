@@ -37,7 +37,8 @@ export default class ErrorBoundary extends React.Component<Props, State> {
         <Text style={styles.title}>{m.title}</Text>
         <Text style={styles.body}>{m.body}</Text>
 
-        <TouchableOpacity style={styles.retry} onPress={() => this.setState({ error: null })}>
+        <TouchableOpacity
+            accessibilityRole="button" style={styles.retry} onPress={() => this.setState({ error: null })}>
           <Text style={styles.retryText}>{m.retry}</Text>
         </TouchableOpacity>
 

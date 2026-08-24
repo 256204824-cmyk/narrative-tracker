@@ -187,6 +187,7 @@ export default function FeedbackScreen() {
         </View>
 
         <TouchableOpacity
+            accessibilityRole="button"
           style={[styles.analyzeBtn, loading && styles.analyzeBtnDisabled]}
           onPress={handleAnalyze}
           disabled={loading}
@@ -268,7 +269,8 @@ export default function FeedbackScreen() {
           <View style={styles.historySection}>
             <Text style={styles.sectionTitle}>{t.feedback.historyTitle}</Text>
             {previousAnalyses.slice(0, 10).map((a) => (
-              <TouchableOpacity key={a.id} style={styles.historyCard} onPress={() => openSaved(a)}>
+              <TouchableOpacity
+            accessibilityRole="button" key={a.id} style={styles.historyCard} onPress={() => openSaved(a)}>
                 <Text style={styles.historyPeriod}>
                   {a.period_start} ~ {a.period_end}
                 </Text>

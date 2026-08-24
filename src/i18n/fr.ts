@@ -35,7 +35,10 @@ export const fr: Messages = {
     },
   },
 
-  scale: { low: '1 Pas du tout', high: '10 Tout à fait' },
+  scale: {
+    scaleA11y: (v: number, max: number) => `${v} sur ${max}`,
+    low: '1 Pas du tout', high: '10 Tout à fait'
+  },
 
   portrait: {
     onboardingTitle: 'À propos de vous',
@@ -49,8 +52,8 @@ export const fr: Messages = {
     textPlaceholder: 'Écrivez ce que vous pensez vraiment…',
     continueToText: 'Continuer',
     backOneStep: 'Revenir à la question précédente',
-    incompleteTitle: 'Merci de répondre à toutes les questions',
-    incompleteBody: "Chaque réponse aide l'IA à mieux vous comprendre.",
+    incompleteTitle: 'Répondez à au moins une',
+    incompleteBody: "Plus vous répondez, plus la comparaison est fine. Mais ne vous forcez pas : laissez vide ce qui ne vient pas, vous pourrez vous réévaluer quand vous voudrez.",
     saveFailed: "Échec de l'enregistrement",
     reassessSavedBody: 'Cette version est enregistrée. La précédente est conservée.',
   },

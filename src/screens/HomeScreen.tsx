@@ -179,7 +179,8 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
 
             {!showForm && (
               <>
-                <TouchableOpacity style={styles.addBtn} onPress={() => setShowForm(true)}>
+                <TouchableOpacity
+            accessibilityRole="button" style={styles.addBtn} onPress={() => setShowForm(true)}>
                   <Text style={styles.addBtnText}>{t.home.add}</Text>
                 </TouchableOpacity>
                 {todayCount > 0 && (
@@ -219,6 +220,7 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
                 <View style={styles.tagsContainer}>
                   {TAG_IDS.map((id) => (
                     <TouchableOpacity
+            accessibilityRole="button"
                       key={id}
                       style={[styles.tagBtn, selectedTags.includes(id) && styles.tagBtnSelected]}
                       onPress={() => toggleTag(id)}
@@ -236,10 +238,12 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
                 </View>
 
                 <View style={styles.formButtons}>
-                  <TouchableOpacity style={styles.cancelBtn} onPress={closeForm}>
+                  <TouchableOpacity
+            accessibilityRole="button" style={styles.cancelBtn} onPress={closeForm}>
                     <Text style={styles.cancelBtnText}>{t.common.cancel}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+            accessibilityRole="button"
                     style={[styles.submitBtn, saving && styles.submitBtnDisabled]}
                     onPress={handleSubmit}
                     disabled={saving}
@@ -251,7 +255,8 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
                 </View>
 
                 {editing && (
-                  <TouchableOpacity style={styles.deleteEntryBtn} onPress={handleDelete}>
+                  <TouchableOpacity
+            accessibilityRole="button" style={styles.deleteEntryBtn} onPress={handleDelete}>
                     <Text style={styles.deleteEntryText}>{t.home.deleteEntry}</Text>
                   </TouchableOpacity>
                 )}
@@ -261,7 +266,8 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
             {facts.length > 0 && (
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>{t.home.historyTitle}</Text>
-                <TouchableOpacity onPress={onNavigateToFeedback}>
+                <TouchableOpacity
+            accessibilityRole="button" onPress={onNavigateToFeedback}>
                   <Text style={styles.analyzeLink}>{t.home.viewAnalysis}</Text>
                 </TouchableOpacity>
               </View>

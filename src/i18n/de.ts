@@ -35,7 +35,10 @@ export const de: Messages = {
     },
   },
 
-  scale: { low: '1 Trifft gar nicht zu', high: '10 Trifft voll zu' },
+  scale: {
+    scaleA11y: (v: number, max: number) => `${v} von ${max}`,
+    low: '1 Trifft gar nicht zu', high: '10 Trifft voll zu'
+  },
 
   portrait: {
     onboardingTitle: 'Über dich',
@@ -49,8 +52,8 @@ export const de: Messages = {
     textPlaceholder: 'Schreib, was du wirklich denkst…',
     continueToText: 'Weiter',
     backOneStep: 'Zurück zur vorherigen Frage',
-    incompleteTitle: 'Bitte beantworte alle Fragen',
-    incompleteBody: 'Jede Antwort hilft der KI, dich besser zu verstehen.',
+    incompleteTitle: 'Beantworte mindestens eine',
+    incompleteBody: 'Je mehr du beantwortest, desto genauer der Vergleich. Aber zwing dich nicht — lass leer, was dir nicht einfällt, und bewerte dich neu, wann immer du magst.',
     saveFailed: 'Speichern fehlgeschlagen',
     reassessSavedBody: 'Diese Version ist gespeichert. Die vorherige bleibt erhalten.',
   },

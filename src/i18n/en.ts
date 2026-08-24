@@ -38,8 +38,8 @@ export const en: Messages = {
     textPlaceholder: 'Write what you actually think…',
     continueToText: 'Continue',
     backOneStep: 'Back to previous question',
-    incompleteTitle: 'Please answer every question',
-    incompleteBody: 'Each answer helps the AI understand you better.',
+    incompleteTitle: 'Answer at least one',
+    incompleteBody: 'The more you answer, the sharper the comparison. But do not force it — leave blanks if nothing comes to mind, and reassess whenever you like.',
     saveFailed: "Couldn't save",
     reassessSavedBody: 'This version is saved. Your previous one is kept.',
   },
@@ -69,6 +69,7 @@ export const en: Messages = {
   },
 
   scale: {
+    scaleA11y: (v: number, max: number) => `${v} out of ${max}`,
     low: '1 Not at all',
     high: '10 Completely',
   },

@@ -35,7 +35,10 @@ export const ko: Messages = {
     },
   },
 
-  scale: { low: '1 전혀 아니다', high: '10 매우 그렇다' },
+  scale: {
+    scaleA11y: (v: number, max: number) => `${max}점 중 ${v}점`,
+    low: '1 전혀 아니다', high: '10 매우 그렇다'
+  },
 
   portrait: {
     onboardingTitle: '당신에 대하여',
@@ -49,8 +52,8 @@ export const ko: Messages = {
     textPlaceholder: '생각한 그대로 적어 보세요…',
     continueToText: '계속',
     backOneStep: '이전 질문으로',
-    incompleteTitle: '모든 질문에 답해 주세요',
-    incompleteBody: '각 답변이 AI가 당신을 이해하는 데 도움이 됩니다.',
+    incompleteTitle: '최소 하나는 답해 주세요',
+    incompleteBody: '많이 답할수록 비교가 정확해집니다. 다만 무리하지 마세요 — 떠오르지 않으면 비워 두고, 언제든 다시 평가할 수 있습니다.',
     saveFailed: '저장하지 못했습니다',
     reassessSavedBody: '이 버전을 저장했습니다. 이전 버전도 그대로 남아 있습니다.',
   },

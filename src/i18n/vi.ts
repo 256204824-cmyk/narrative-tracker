@@ -35,7 +35,10 @@ export const vi: Messages = {
     },
   },
 
-  scale: { low: '1 Hoàn toàn không đúng', high: '10 Hoàn toàn đúng' },
+  scale: {
+    scaleA11y: (v: number, max: number) => `${v} trên ${max}`,
+    low: '1 Hoàn toàn không đúng', high: '10 Hoàn toàn đúng'
+  },
 
   portrait: {
     onboardingTitle: 'Về bạn',
@@ -49,8 +52,8 @@ export const vi: Messages = {
     textPlaceholder: 'Viết điều bạn thực sự nghĩ…',
     continueToText: 'Tiếp tục',
     backOneStep: 'Quay lại câu trước',
-    incompleteTitle: 'Vui lòng trả lời tất cả câu hỏi',
-    incompleteBody: 'Mỗi câu trả lời đều giúp AI hiểu bạn rõ hơn.',
+    incompleteTitle: 'Hãy trả lời ít nhất một câu',
+    incompleteBody: 'Trả lời càng nhiều thì đối chiếu càng chuẩn. Nhưng đừng gượng ép — nghĩ không ra thì cứ để trống, lúc nào cũng có thể đánh giá lại.',
     saveFailed: 'Không lưu được',
     reassessSavedBody: 'Đã lưu phiên bản này. Phiên bản trước vẫn được giữ lại.',
   },

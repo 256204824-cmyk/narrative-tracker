@@ -78,8 +78,11 @@ export default function SelfPortraitForm({
   );
 
   const handleFinish = async () => {
-    const missing = textQuestions.filter((id) => !(texts[id] ?? '').trim());
-    if (missing.length > 0) {
+    // PRD 3.1 明说「这一步的目标不是得到准确答案」。
+    // 这是流失率最高的一屏，强制填满三道开放题会把人挡在门外；
+    // 答一个就够起步，之后随时可以重评补齐。
+    const answered = textQuestions.filter((id) => (texts[id] ?? '').trim());
+    if (answered.length === 0) {
       notify(t.portrait.incompleteTitle, t.portrait.incompleteBody);
       return;
     }
@@ -127,15 +130,18 @@ export default function SelfPortraitForm({
           </View>
           <View style={styles.buttons}>
             {step > 0 ? (
-              <TouchableOpacity style={styles.btnSecondary} onPress={() => setStep(step - 1)}>
+              <TouchableOpacity
+            accessibilityRole="button" style={styles.btnSecondary} onPress={() => setStep(step - 1)}>
                 <Text style={styles.btnSecondaryText}>{t.common.prev}</Text>
               </TouchableOpacity>
             ) : onCancel ? (
-              <TouchableOpacity style={styles.btnSecondary} onPress={onCancel}>
+              <TouchableOpacity
+            accessibilityRole="button" style={styles.btnSecondary} onPress={onCancel}>
                 <Text style={styles.btnSecondaryText}>{t.common.cancel}</Text>
               </TouchableOpacity>
             ) : null}
-            <TouchableOpacity style={styles.btnPrimary} onPress={() => setStep(step + 1)}>
+            <TouchableOpacity
+            accessibilityRole="button" style={styles.btnPrimary} onPress={() => setStep(step + 1)}>
               <Text style={styles.btnPrimaryText}>
                 {step === scaleQuestions.length - 1 ? t.portrait.continueToText : t.common.next}
               </Text>
@@ -181,6 +187,7 @@ export default function SelfPortraitForm({
           ))}
 
           <TouchableOpacity
+            accessibilityRole="button"
             style={[styles.btnSubmit, saving && styles.btnDisabled]}
             onPress={handleFinish}
             disabled={saving}
@@ -188,7 +195,8 @@ export default function SelfPortraitForm({
             <Text style={styles.btnSubmitText}>{saving ? t.common.saving : submitLabel}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.btnBack} onPress={() => setStep(scaleQuestions.length - 1)}>
+          <TouchableOpacity
+            accessibilityRole="button" style={styles.btnBack} onPress={() => setStep(scaleQuestions.length - 1)}>
             <Text style={styles.btnBackText}>{t.portrait.backOneStep}</Text>
           </TouchableOpacity>
         </ScrollView>
