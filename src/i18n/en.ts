@@ -163,6 +163,10 @@ export const en: Messages = {
     presetsDesc: 'Sorted by privacy, not by price. This app sends your most personal notes — check what a provider does with them before checking whether it is free.',
     presetFree: 'free tier',
     presetNoKey: 'no key needed',
+    presetNeedsComputer: 'needs a computer',
+    presetGetKey: 'Get a key →',
+    presetKeyReminder: (name: string) =>
+      `${name} needs its own API key — the one you have saved will not work here and will return 401. Tap "Get a key" in the list to sign up, then replace it above.`,
     presetApplied: (name: string) => `Switched to ${name}. You may need to adjust the model name to whatever they currently offer.`,
     policyLocal: 'never leaves your device',
     policyNoRetainNoTrain: 'not retained, not used for training',

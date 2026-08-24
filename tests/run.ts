@@ -460,14 +460,24 @@ group('置信度必须调制呈现强度（PRD 5.2）', () => {
 
 // ────────────────────────────────────────────────
 group('Provider 预设', () => {
-  // 排序原则是隐私而不是免费——这是产品立场，不能被以后随手改掉
-  const ranks = PROVIDER_PRESETS.map((p) => POLICY_RANK[p.policy]);
-  ok('按隐私强度升序排列', ranks.every((r, i) => i === 0 || ranks[i - 1] <= r));
-  check('最安全的是本机模型', PROVIDER_PRESETS[0].policy, 'local');
-  ok('会训练数据的排在最后', POLICY_RANK[PROVIDER_PRESETS[PROVIDER_PRESETS.length - 1].policy] >= POLICY_RANK.mayTrain);
-  ok('至少有一个本机选项', PROVIDER_PRESETS.some((p) => p.policy === 'local'));
-  ok('至少有一个免费且不训练的云服务',
-    PROVIDER_PRESETS.some((p) => p.free && p.policy === 'noRetainNoTrain' && p.needsKey));
+  // 目标用户在手机上（PRD 2.1），需要电脑的方案不能挡在前面
+  const phoneUsable = PROVIDER_PRESETS.filter((p) => !p.needsComputer);
+  const needsPC = PROVIDER_PRESETS.filter((p) => p.needsComputer);
+  ok('手机可用的排在需要电脑的前面',
+    PROVIDER_PRESETS.findIndex((p) => p.needsComputer) === phoneUsable.length);
+  check('第一项手机上就能用', PROVIDER_PRESETS[0].needsComputer, false);
+  check('第一项有免费额度', PROVIDER_PRESETS[0].free, true);
+  check('第一项不拿数据训练', PROVIDER_PRESETS[0].policy, 'noRetainNoTrain');
+
+  // 手机可用的这一组内部仍按隐私强度排序
+  const ranks = phoneUsable.map((p) => POLICY_RANK[p.policy]);
+  ok('手机组内按隐私强度升序', ranks.every((r, i) => i === 0 || ranks[i - 1] <= r));
+  ok('会训练数据的排在手机组最后',
+    POLICY_RANK[phoneUsable[phoneUsable.length - 1].policy] >= POLICY_RANK.mayTrain);
+  ok('本机方案都标了需要电脑', needsPC.every((p) => p.policy === 'local'));
+  ok('本机方案不需要 Key', needsPC.every((p) => !p.needsKey));
+  ok('至少两个手机可用且免费不训练的服务',
+    phoneUsable.filter((p) => p.free && p.policy === 'noRetainNoTrain').length >= 2);
 
   // 每条预设本身要合法，否则一点就坏
   for (const p of PROVIDER_PRESETS) {
@@ -478,6 +488,7 @@ group('Provider 预设', () => {
     ok(`${p.id} 不带 /chat/completions`, !p.baseUrl.includes('/chat/completions'));
     // 本机服务不该要求 Key，云服务必须要求
     check(`${p.id} 的 needsKey 与 local 一致`, p.needsKey, p.policy !== 'local');
+    ok(`${p.id} 有注册/安装链接`, /^https?:\/\//.test(p.signupUrl));
   }
 
   check('id 唯一', new Set(PROVIDER_PRESETS.map((p) => p.id)).size, PROVIDER_PRESETS.length);
@@ -498,6 +509,9 @@ group('Provider 预设', () => {
     ];
     ok(`${loc} 五种数据政策文案齐备`, texts.every((x) => x.length > 0));
     ok(`${loc} 五种政策文案互不相同`, new Set(texts).size === 5);
+    // 换 provider 忘了换 Key 是最容易踩的坑，提示必须带上服务商名字
+    ok(`${loc} 换 Key 提示带服务商名`, m.settings.presetKeyReminder('Groq').includes('Groq'));
+    ok(`${loc} 有「需要电脑」标签`, m.settings.presetNeedsComputer.length > 0);
   }
 });
 

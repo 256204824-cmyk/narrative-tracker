@@ -135,6 +135,10 @@ export const ja: Messages = {
     presetsDesc: '料金ではなくプライバシー順に並べています。このアプリが送るのは最も私的な記録です。無料かどうかより先に、その事業者がデータをどう扱うかを確認してください。',
     presetFree: '無料枠あり',
     presetNoKey: 'キー不要',
+    presetNeedsComputer: 'パソコンが必要',
+    presetGetKey: 'キーを取得 →',
+    presetKeyReminder: (name: string) =>
+      `${name} には専用の API キーが必要です。今保存されているキーはこのサービスでは使えず、401 が返ります。一覧の「キーを取得」から登録し、上で入れ替えてください。`,
     presetApplied: (name: string) => `${name} に切り替えました。モデル名は提供状況に合わせて調整が必要な場合があります。`,
     policyLocal: '端末の外に出ません',
     policyNoRetainNoTrain: '保存されず、学習にも使われません',

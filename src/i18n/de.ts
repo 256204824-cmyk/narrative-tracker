@@ -135,6 +135,10 @@ export const de: Messages = {
     presetsDesc: 'Nach Datenschutz sortiert, nicht nach Preis. Diese App schickt deine persönlichsten Notizen — sieh zuerst nach, was ein Anbieter damit macht, und erst dann, ob er kostenlos ist.',
     presetFree: 'kostenloses Kontingent',
     presetNoKey: 'kein Schlüssel nötig',
+    presetNeedsComputer: 'braucht einen Computer',
+    presetGetKey: 'Schlüssel holen →',
+    presetKeyReminder: (name: string) =>
+      `${name} braucht einen eigenen API-Schlüssel — der gespeicherte funktioniert hier nicht und liefert 401. Tippe in der Liste auf „Schlüssel holen", registriere dich und ersetze ihn oben.`,
     presetApplied: (name: string) => `Auf ${name} umgestellt. Der Modellname muss eventuell an das aktuelle Angebot angepasst werden.`,
     policyLocal: 'verlässt dein Gerät nie',
     policyNoRetainNoTrain: 'wird nicht gespeichert und nicht zum Training genutzt',

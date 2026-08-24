@@ -165,6 +165,10 @@ export const zhHans = {
     presetsDesc: '按隐私强度排序。这个 App 送出去的是你最私密的记录，先看它对数据做什么，再看免不免费。',
     presetFree: '有免费额度',
     presetNoKey: '无需 Key',
+    presetNeedsComputer: '需要电脑',
+    presetGetKey: '获取 Key →',
+    presetKeyReminder: (name: string) =>
+      `${name} 需要它自己的 API Key —— 你当前保存的 Key 在这个服务上用不了，会直接报 401。点列表里的「获取 Key」去注册，然后回到上面替换。`,
     presetApplied: (name: string) => `已切换到 ${name}，模型名可能需要按服务商当前情况调整。`,
     policyLocal: '完全不出你的设备',
     policyNoRetainNoTrain: '不保留、不用于训练',

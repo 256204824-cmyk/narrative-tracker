@@ -135,6 +135,10 @@ export const es: Messages = {
     presetsDesc: 'Ordenados por privacidad, no por precio. Esta app envía tus notas más personales: mira qué hace el proveedor con ellas antes de mirar si es gratis.',
     presetFree: 'plan gratuito',
     presetNoKey: 'sin clave',
+    presetNeedsComputer: 'necesita un ordenador',
+    presetGetKey: 'Obtener clave →',
+    presetKeyReminder: (name: string) =>
+      `${name} necesita su propia clave de API: la que tienes guardada no funcionará aquí y devolverá 401. Toca "Obtener clave" en la lista para registrarte y sustitúyela arriba.`,
     presetApplied: (name: string) => `Cambiado a ${name}. Puede que tengas que ajustar el nombre del modelo a lo que ofrezcan ahora.`,
     policyLocal: 'nunca sale de tu dispositivo',
     policyNoRetainNoTrain: 'no se conserva ni se usa para entrenar',

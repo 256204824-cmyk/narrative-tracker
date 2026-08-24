@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
+  Linking,
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -132,12 +133,20 @@ export default function SettingsScreen({ onReassess }: Props) {
             : t.settings.policyUnknown;
 
   const applyPreset = async (preset: ProviderPreset) => {
+    const changedProvider = matchPreset(baseUrl)?.id !== preset.id;
     await saveProviderConfig({ baseUrl: preset.baseUrl, model: preset.model });
     setBaseUrl(preset.baseUrl);
     setModel(preset.model);
     setPresetsOpen(false);
     setEditingProvider(false);
-    notify(t.common.saved, t.settings.presetApplied(preset.name));
+
+    // 换 provider 必须换 Key。之前只改 URL 不提示，用户拿着上一家的 Key
+    // 请求新服务，只会收到一个 401——这是最容易踩、也最难自己想明白的坑。
+    if (preset.needsKey && changedProvider) {
+      notify(t.common.saved, t.settings.presetKeyReminder(preset.name));
+    } else {
+      notify(t.common.saved, t.settings.presetApplied(preset.name));
+    }
   };
 
   const handleResetProvider = async () => {
@@ -390,10 +399,19 @@ export default function SettingsScreen({ onReassess }: Props) {
                       {!preset.needsKey && (
                         <Text style={styles.tagNoKey}>{t.settings.presetNoKey}</Text>
                       )}
+                      {preset.needsComputer && (
+                        <Text style={styles.tagComputer}>{t.settings.presetNeedsComputer}</Text>
+                      )}
                       {selected && <Text style={styles.localeCheck}>✓</Text>}
                     </View>
                     <Text style={[styles.presetPolicy, risky && styles.presetPolicyRisky]}>
                       {policyText(preset.policy)}
+                    </Text>
+                    <Text
+                      style={styles.presetLink}
+                      onPress={() => Linking.openURL(preset.signupUrl)}
+                    >
+                      {t.settings.presetGetKey}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -651,6 +669,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   presetPolicy: { fontSize: 12, color: '#64748b', marginTop: 4, lineHeight: 17 },
+  presetLink: { fontSize: 12, color: '#4f46e5', fontWeight: '600', marginTop: 6 },
+  tagComputer: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#b45309',
+    backgroundColor: '#fef3c7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
   presetPolicyRisky: { color: '#b45309' },
   localeRow: {
     flexDirection: 'row',

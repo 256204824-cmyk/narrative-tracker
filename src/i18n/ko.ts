@@ -135,6 +135,10 @@ export const ko: Messages = {
     presetsDesc: '가격이 아니라 프라이버시 순으로 정렬했습니다. 이 앱이 보내는 것은 가장 사적인 기록입니다. 무료인지보다 먼저, 그 업체가 데이터를 어떻게 다루는지 확인하세요.',
     presetFree: '무료 한도 있음',
     presetNoKey: '키 불필요',
+    presetNeedsComputer: '컴퓨터 필요',
+    presetGetKey: '키 발급받기 →',
+    presetKeyReminder: (name: string) =>
+      `${name}에는 전용 API 키가 필요합니다. 지금 저장된 키는 이 서비스에서 작동하지 않고 401을 반환합니다. 목록의 "키 발급받기"에서 가입한 뒤 위에서 교체하세요.`,
     presetApplied: (name: string) => `${name}(으)로 전환했습니다. 모델 이름은 현재 제공 상황에 맞게 조정해야 할 수 있습니다.`,
     policyLocal: '기기 밖으로 나가지 않음',
     policyNoRetainNoTrain: '보관하지 않고 학습에도 쓰지 않음',

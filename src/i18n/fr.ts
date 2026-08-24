@@ -135,6 +135,10 @@ export const fr: Messages = {
     presetsDesc: 'Classés par confidentialité, pas par prix. Cette app envoie vos notes les plus intimes : regardez ce que le fournisseur en fait avant de regarder si c’est gratuit.',
     presetFree: 'offre gratuite',
     presetNoKey: 'sans clé',
+    presetNeedsComputer: 'nécessite un ordinateur',
+    presetGetKey: 'Obtenir une clé →',
+    presetKeyReminder: (name: string) =>
+      `${name} nécessite sa propre clé d'API : celle que vous avez enregistrée ne fonctionnera pas ici et renverra une 401. Touchez « Obtenir une clé » dans la liste pour vous inscrire, puis remplacez-la ci-dessus.`,
     presetApplied: (name: string) => `Basculé sur ${name}. Le nom du modèle devra peut-être être ajusté à leur catalogue actuel.`,
     policyLocal: 'ne quitte jamais votre appareil',
     policyNoRetainNoTrain: 'ni conservé ni utilisé pour l’entraînement',

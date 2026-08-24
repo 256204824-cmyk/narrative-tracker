@@ -18,37 +18,29 @@ Several free tiers are free precisely because **your prompts become training
 data**, sometimes with human review. That is a fair trade for asking a chatbot
 to write an email. It is a much worse trade for this.
 
-So the list in Settings is **sorted by privacy, not by price.**
+So the list in Settings puts **what actually works on a phone first**, and
+within that, sorts by privacy rather than price. (Running a model locally is
+the strongest privacy answer, but it needs a computer — it is at the bottom of
+the list for that reason, not because it is worse.)
+
+**You need a key from whichever provider you pick.** Switching the preset
+changes the endpoint, not your key — carrying an old key across providers just
+returns 401. Each row has a "Get a key" link.
 
 ## The options
 
 Verified 2026-08-24. Policies and free tiers change — check before relying on
 any of this.
 
-### Best: a model on your own machine
+### Start here: free, works on a phone, does not train on you
 
-| | |
-|---|---|
-| **Ollama** | `http://localhost:11434/v1` |
-| **LM Studio** | `http://localhost:1234/v1` |
+| | Free tier | Suggested model | Data policy |
+|---|---|---|---|
+| **[Groq](https://console.groq.com/keys)** | yes | `openai/gpt-oss-120b` | Zero data retention; prompts are discarded once the response returns, and are not used for training |
+| **[Cerebras](https://cloud.cerebras.ai)** | 1M tokens/day, no card | `gpt-oss-120b` | Inputs and outputs are not retained and not used for training or fine-tuning |
 
-Free, no key, no sign-up, and **nothing leaves your network**. The privacy
-question stops being about trust and becomes a fact of the setup.
-
-The cost is that you need a reasonably capable computer, and smaller local
-models are weaker at following the required JSON schema — if reports fail,
-the diagnostics panel will show you exactly what came back.
-
-### Free with a real privacy policy
-
-| | Free tier | Data policy |
-|---|---|---|
-| **[Groq](https://console.groq.com)** | yes | Zero data retention; prompts are discarded once the response returns, and are not used for training |
-| **[Cerebras](https://cloud.cerebras.ai)** | 1M tokens/day, no card | Inputs and outputs are not retained and not used for training or fine-tuning |
-
-These are the two to start with if you do not want to run anything locally.
-Note that Cerebras' free tier caps context at 8K tokens — long report ranges
-may get truncated, which the app will tell you about explicitly.
+Sign up, copy the key into Settings, done. Both free tiers give 65k of context,
+which comfortably covers a month of entries.
 
 ### Paid, but does not train on you
 
@@ -68,6 +60,22 @@ They are in the list because hiding options would be patronising, and because
 for some people the trade is acceptable. But please make it a decision rather
 than an accident — and consider whether you would be comfortable with a
 stranger reading the entries you are about to submit.
+
+### Strongest privacy, but you need a computer
+
+| | |
+|---|---|
+| **Ollama** | `http://localhost:11434/v1` |
+| **LM Studio** | `http://localhost:1234/v1` |
+
+Free, no key, no sign-up, and **nothing leaves your network** — the privacy
+question stops being about trust and becomes a fact of the setup.
+
+This is last in the list only because the people this app is for are on
+phones, and a phone cannot run these. If you do have a machine to spare, it is
+the best option there is. Note that smaller local models are weaker at
+following the required JSON schema; if a report fails, the diagnostics panel
+shows exactly what came back.
 
 ## A note on model names
 

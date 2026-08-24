@@ -135,6 +135,10 @@ export const vi: Messages = {
     presetsDesc: 'Sắp xếp theo mức riêng tư, không theo giá. Ứng dụng này gửi đi những ghi chép riêng tư nhất của bạn — hãy xem họ làm gì với dữ liệu trước khi xem có miễn phí hay không.',
     presetFree: 'có hạn mức miễn phí',
     presetNoKey: 'không cần khoá',
+    presetNeedsComputer: 'cần máy tính',
+    presetGetKey: 'Lấy khoá →',
+    presetKeyReminder: (name: string) =>
+      `${name} cần khoá API riêng của nó — khoá bạn đang lưu sẽ không dùng được ở đây và sẽ trả về 401. Bấm "Lấy khoá" trong danh sách để đăng ký, rồi thay ở phía trên.`,
     presetApplied: (name: string) => `Đã chuyển sang ${name}. Có thể bạn cần chỉnh tên mô hình theo danh mục hiện tại của họ.`,
     policyLocal: 'không bao giờ rời khỏi thiết bị của bạn',
     policyNoRetainNoTrain: 'không lưu giữ, không dùng để huấn luyện',

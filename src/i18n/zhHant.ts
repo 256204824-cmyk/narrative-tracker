@@ -135,6 +135,10 @@ export const zhHant: Messages = {
     presetsDesc: '按隱私強度排序。這個 App 送出去的是你最私密的記錄，先看它對資料做什麼，再看免不免費。',
     presetFree: '有免費額度',
     presetNoKey: '無需 Key',
+    presetNeedsComputer: '需要電腦',
+    presetGetKey: '取得 Key →',
+    presetKeyReminder: (name: string) =>
+      `${name} 需要它自己的 API Key —— 你目前儲存的 Key 在這個服務上不能用，會直接回 401。點列表裡的「取得 Key」去註冊，然後回到上面替換。`,
     presetApplied: (name: string) => `已切換到 ${name}，模型名可能需要依服務商目前情況調整。`,
     policyLocal: '完全不出你的裝置',
     policyNoRetainNoTrain: '不保留、不用於訓練',
