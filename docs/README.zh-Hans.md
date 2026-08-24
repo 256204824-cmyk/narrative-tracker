@@ -2,6 +2,17 @@
 
 > [English](../README.md)
 
+<p align="center">
+  <img src="screenshots/facts.png" alt="事实日志" width="46%">
+  &nbsp;&nbsp;
+  <img src="screenshots/report.png" alt="叙事审计报告" width="46%">
+</p>
+
+<p align="center">
+  <em>左：每天 30-60 秒，记录你实际做了什么。<br>
+  右：事实对你讲给自己的那个故事说了什么。</em>
+</p>
+
 **看见你以为的自己，和你真实行动之间的距离。**
 
 一个帮助年轻人用自己提交的事实，校准自我认知的本地 AI 工具。

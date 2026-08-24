@@ -7,6 +7,7 @@ import { t } from '../i18n';
 import { tagLabel } from '../constants/questions';
 import { inspectAnalysis, type FieldIssue } from './analysisShape';
 import { SYSTEM_PROMPT, ANALYSIS_JSON_SCHEMA } from './analysisPrompt';
+import { matchPreset } from './providerPresets';
 
 /**
  * AI 返回结构不符合预期时抛出，携带足够界面展示的诊断信息。
@@ -201,12 +202,15 @@ ${facts
 
 export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisOutput> {
   const apiKey = await getApiKey();
-  if (!apiKey) {
-    throw new Error(t().ai.noKey);
-  }
-
   const userPrompt = buildAnalysisPrompt(input);
   const { baseUrl, model } = await getProviderConfig();
+
+  // 本机模型（Ollama / LM Studio）不需要 Key，预设里也标了「无需 Key」——
+  // 却在这里被无条件拦下，等于那两个选项根本用不了。
+  const needsKey = matchPreset(baseUrl)?.needsKey ?? true;
+  if (!apiKey && needsKey) {
+    throw new Error(t().ai.noKey);
+  }
 
   const messages = [
     // 报告是给用户读的，必须用界面语言写；prompt 骨架保持中文即可，
@@ -234,7 +238,9 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        // 没有 Key 时（本机模型）不要发空的 Authorization 头，
+        // 有些服务端会把它当成非法凭据直接拒绝
+        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       },
       body: JSON.stringify({
         model,

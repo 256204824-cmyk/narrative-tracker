@@ -476,6 +476,10 @@ group('Provider 预设', () => {
     POLICY_RANK[phoneUsable[phoneUsable.length - 1].policy] >= POLICY_RANK.mayTrain);
   ok('本机方案都标了需要电脑', needsPC.every((p) => p.policy === 'local'));
   ok('本机方案不需要 Key', needsPC.every((p) => !p.needsKey));
+  // 标了「无需 Key」就必须真的能在没有 Key 的情况下发起请求，
+  // 否则这个标签是骗人的（requestAnalysis 里按 matchPreset 判断）
+  ok('无需 Key 的预设都能被 matchPreset 识别',
+    PROVIDER_PRESETS.filter((p) => !p.needsKey).every((p) => matchPreset(p.baseUrl)?.id === p.id));
   ok('至少两个手机可用且免费不训练的服务',
     phoneUsable.filter((p) => p.free && p.policy === 'noRetainNoTrain').length >= 2);
 

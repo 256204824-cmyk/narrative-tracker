@@ -7,6 +7,17 @@ choose to submit — nothing else.
 
 [简体中文](docs/README.zh-Hans.md)
 
+<p align="center">
+  <img src="docs/screenshots/facts.png" alt="The fact log: a month of short daily entries" width="46%">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/report.png" alt="The narrative audit: alignment score, where facts agree, where they differ" width="46%">
+</p>
+
+<p align="center">
+  <em>Left: 30–60 seconds a day, recording what you actually did.<br>
+  Right: what the facts say about the story you tell yourself.</em>
+</p>
+
 ---
 
 ## Why
@@ -135,6 +146,7 @@ SQLite migrations.
 
 - [Product requirements](docs/product-requirements.md) (Chinese, v2.0 — the
   authoritative spec)
+- [Architecture](docs/architecture.md)
 - [Choosing a provider](docs/providers.md)
 - [Privacy policy](docs/privacy.md)
 - [Data flow](docs/data-flow.md)
