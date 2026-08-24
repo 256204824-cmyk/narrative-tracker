@@ -20,7 +20,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { readTextFile } from '../utils/readTextFile';
 import { useT } from '../i18n/useT';
 import { TIER_LIMITS } from '../constants/questions';
-import { localeOptions, type LocalePreference } from '../i18n';
+import { localeOptions, messagesFor, type LocalePreference } from '../i18n';
 import { today } from '../utils/date';
 import { notify, confirmDestructive } from '../utils/dialog';
 import type { SelfPortrait } from '../types';
@@ -56,6 +56,7 @@ export default function SettingsScreen({ onReassess }: Props) {
   const [model, setModel] = useState(DEFAULT_PROVIDER.model);
   const [editingProvider, setEditingProvider] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
   const [importing, setImporting] = useState(false);
 
   // 用 useFocusEffect 而不是 useEffect：重评页是模态，返回时本组件不会重新挂载，
@@ -225,6 +226,53 @@ export default function SettingsScreen({ onReassess }: Props) {
     <SafeAreaView style={styles.safe}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>{t.settings.title}</Text>
+
+        {/* Language Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t.settings.languageTitle}</Text>
+          <Text style={styles.sectionDesc}>{t.settings.languageDesc}</Text>
+
+          {/* 11 个选项平铺太占地方，收成一栏；展开选完自动收起。
+              收起时显示当前生效的语言，跟随系统时把实际语言也带出来，
+              否则用户只看到「跟随系统」，不知道系统被识别成了哪种语言。 */}
+          <TouchableOpacity
+            style={styles.localeToggle}
+            onPress={() => setLanguageOpen((v) => !v)}
+          >
+            <Text style={styles.localeCurrent}>
+              {localePreference === 'system'
+                ? `${t.settings.languageSystem} · ${messagesFor(locale).locale.name}`
+                : messagesFor(localePreference).locale.name}
+            </Text>
+            <Text style={styles.localeChevron}>{languageOpen ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+
+          {languageOpen && (
+            <View style={styles.localeList}>
+              {[
+                { locale: 'system' as const, name: t.settings.languageSystem },
+                ...localeOptions(),
+              ].map((opt) => {
+                const selected = localePreference === opt.locale;
+                return (
+                  <TouchableOpacity
+                    key={opt.locale}
+                    style={[styles.localeRow, selected && styles.localeRowSelected]}
+                    onPress={async () => {
+                      await setLocalePreference(opt.locale as LocalePreference);
+                      setLanguageOpen(false);
+                    }}
+                  >
+                    <Text style={[styles.localeName, selected && styles.localeNameSelected]}>
+                      {opt.name}
+                    </Text>
+                    {selected && <Text style={styles.localeCheck}>✓</Text>}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+        </View>
 
         {/* API Key Section */}
         <View style={styles.section}>
@@ -454,32 +502,6 @@ export default function SettingsScreen({ onReassess }: Props) {
           </View>
         )}
 
-        {/* Language Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t.settings.languageTitle}</Text>
-          <Text style={styles.sectionDesc}>{t.settings.languageDesc}</Text>
-          {/* 11 个选项塞不进三列网格，改用竖排列表 */}
-          <View style={styles.localeList}>
-            {[{ locale: 'system' as const, name: t.settings.languageSystem }, ...localeOptions()].map(
-              (opt) => {
-                const selected = localePreference === opt.locale;
-                return (
-                  <TouchableOpacity
-                    key={opt.locale}
-                    style={[styles.localeRow, selected && styles.localeRowSelected]}
-                    onPress={() => setLocalePreference(opt.locale as LocalePreference)}
-                  >
-                    <Text style={[styles.localeName, selected && styles.localeNameSelected]}>
-                      {opt.name}
-                    </Text>
-                    {selected && <Text style={styles.localeCheck}>✓</Text>}
-                  </TouchableOpacity>
-                );
-              }
-            )}
-          </View>
-        </View>
-
         {/* Privacy Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.settings.privacyTitle}</Text>
@@ -519,7 +541,19 @@ const styles = StyleSheet.create({
   resetBtn: { paddingVertical: 12, alignItems: 'center' },
   resetBtnText: { color: '#888', fontSize: 13, fontWeight: '600' },
   devSection: { borderWidth: 1, borderColor: '#fde68a', backgroundColor: '#fffbeb' },
-  localeList: { marginTop: 12, borderRadius: 12, backgroundColor: '#fff', overflow: 'hidden' },
+  localeToggle: {
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+  },
+  localeCurrent: { fontSize: 15, color: '#1a1a2e', fontWeight: '600', flexShrink: 1 },
+  localeChevron: { fontSize: 10, color: '#999', marginLeft: 8 },
+  localeList: { marginTop: 8, borderRadius: 12, backgroundColor: '#fff', overflow: 'hidden' },
   localeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
