@@ -16,9 +16,11 @@ import { today, daysAgo, countDistinctDays } from '../utils/date';
 import { TIER_LIMITS, MIN_DAYS_FOR_ANALYSIS } from '../constants/questions';
 import type { AIAnalysisOutput, AnalysisResult, FactLog, SelfPortrait } from '../types';
 import { useAppState } from '../store/AppContext';
+import { useT } from '../i18n/useT';
 
 export default function FeedbackScreen() {
   const { tier } = useAppState();
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AIAnalysisOutput | null>(null);
@@ -36,7 +38,7 @@ export default function FeedbackScreen() {
       setFactCount(facts.length);
     } catch (err) {
       // 静默失败会让界面显示 0 条事实，用户无法区分「没数据」和「读取出错」
-      setError('读取本地记录失败，请重试。');
+      setError(t.feedback.loadFailed);
     }
   }, [maxDays]);
 
@@ -78,7 +80,7 @@ export default function FeedbackScreen() {
       const portraits = await getAllSelfPortraits();
       const portrait = portraits[0];
       if (!portrait) {
-        setError('请先完成自我画像。');
+        setError(t.feedback.noPortrait);
         setLoading(false);
         return;
       }
@@ -89,7 +91,7 @@ export default function FeedbackScreen() {
       const facts: FactLog[] = await getFactLogsBetween(since, endDate);
 
       if (facts.length === 0) {
-        setError('当前时间范围内没有事实记录。请先记录一些事实。');
+        setError(t.feedback.noFacts);
         setLoading(false);
         return;
       }
@@ -99,8 +101,7 @@ export default function FeedbackScreen() {
       const distinctDays = countDistinctDays(facts);
       if (distinctDays < MIN_DAYS_FOR_ANALYSIS) {
         setError(
-          `最近 ${maxDays} 天里你有 ${distinctDays} 天的记录，还需要再记录 ${MIN_DAYS_FOR_ANALYSIS - distinctDays} 天。` +
-            `\n\n跨越不同日子的记录才能看出模式，同一天写多条不算。`
+          t.feedback.needMoreDays(maxDays, distinctDays, MIN_DAYS_FOR_ANALYSIS - distinctDays)
         );
         setLoading(false);
         return;
@@ -129,7 +130,7 @@ export default function FeedbackScreen() {
 
       await loadPrevious();
     } catch (err: any) {
-      setError(err.message || '分析失败，请检查 API Key 和网络连接。');
+      setError(err.message || t.feedback.genericFailure);
     } finally {
       setLoading(false);
     }
@@ -138,23 +139,23 @@ export default function FeedbackScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>叙事审计</Text>
+        <Text style={styles.title}>{t.feedback.title}</Text>
         <Text style={styles.subtitle}>
-          对比「你以为的自己」和「你记录的事实」
+          {t.feedback.subtitle}
         </Text>
 
         <View style={styles.infoRow}>
           <View style={styles.infoCard}>
-            <Text style={styles.infoValue}>{maxDays} 天</Text>
-            <Text style={styles.infoLabel}>分析范围</Text>
+            <Text style={styles.infoValue}>{t.feedback.windowValue(maxDays)}</Text>
+            <Text style={styles.infoLabel}>{t.feedback.windowLabel}</Text>
           </View>
           <View style={styles.infoCard}>
             <Text style={styles.infoValue}>{factCount}</Text>
-            <Text style={styles.infoLabel}>条事实</Text>
+            <Text style={styles.infoLabel}>{t.feedback.factsLabel}</Text>
           </View>
           <View style={styles.infoCard}>
             <Text style={styles.infoValue}>{previousAnalyses.length}</Text>
-            <Text style={styles.infoLabel}>次分析</Text>
+            <Text style={styles.infoLabel}>{t.feedback.analysesLabel}</Text>
           </View>
         </View>
 
@@ -166,7 +167,7 @@ export default function FeedbackScreen() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.analyzeBtnText}>生成分析报告</Text>
+            <Text style={styles.analyzeBtnText}>{t.feedback.generate}</Text>
           )}
         </TouchableOpacity>
 
@@ -181,17 +182,17 @@ export default function FeedbackScreen() {
             <GapIndicator alignmentScore={result.alignment_score} confidence={result.confidence} />
 
             <View style={styles.summaryCard}>
-              <Text style={styles.sectionTitle}>总结</Text>
+              <Text style={styles.sectionTitle}>{t.feedback.summary}</Text>
               <Text style={styles.summaryText}>{result.summary}</Text>
             </View>
 
             {result.matched_beliefs.length > 0 && (
               <View style={styles.sectionCard}>
-                <Text style={styles.sectionTitle}>✓ 一致的地方</Text>
+                <Text style={styles.sectionTitle}>{t.feedback.matched}</Text>
                 {result.matched_beliefs.map((item, i) => (
                   <View key={i} style={styles.beliefItem}>
                     <Text style={styles.beliefLabel}>"{item.belief}"</Text>
-                    <Text style={styles.beliefEvidence}>证据：{item.evidence}</Text>
+                    <Text style={styles.beliefEvidence}>{t.feedback.evidencePrefix(item.evidence)}</Text>
                     <Text style={styles.beliefAssessment}>{item.assessment}</Text>
                   </View>
                 ))}
@@ -200,11 +201,11 @@ export default function FeedbackScreen() {
 
             {result.gaps.length > 0 && (
               <View style={styles.sectionCard}>
-                <Text style={styles.sectionTitle}>! 不一致的地方</Text>
+                <Text style={styles.sectionTitle}>{t.feedback.gaps}</Text>
                 {result.gaps.map((item, i) => (
                   <View key={i} style={styles.beliefItem}>
                     <Text style={styles.beliefLabel}>"{item.belief}"</Text>
-                    <Text style={styles.beliefEvidence}>证据：{item.evidence}</Text>
+                    <Text style={styles.beliefEvidence}>{t.feedback.evidencePrefix(item.evidence)}</Text>
                     <Text style={styles.beliefAssessment}>{item.assessment}</Text>
                   </View>
                 ))}
@@ -213,7 +214,7 @@ export default function FeedbackScreen() {
 
             {result.insufficient_evidence.length > 0 && (
               <View style={styles.sectionCard}>
-                <Text style={styles.sectionTitle}>? 证据不足</Text>
+                <Text style={styles.sectionTitle}>{t.feedback.insufficient}</Text>
                 {result.insufficient_evidence.map((item, i) => (
                   <Text key={i} style={styles.insufficientItem}>- {item}</Text>
                 ))}
@@ -222,7 +223,7 @@ export default function FeedbackScreen() {
 
             {result.suggested_reflection ? (
               <View style={styles.reflectionCard}>
-                <Text style={styles.sectionTitle}>建议</Text>
+                <Text style={styles.sectionTitle}>{t.feedback.suggestion}</Text>
                 <Text style={styles.reflectionText}>{result.suggested_reflection}</Text>
               </View>
             ) : null}
@@ -231,7 +232,7 @@ export default function FeedbackScreen() {
 
         {previousAnalyses.length > 0 && (
           <View style={styles.historySection}>
-            <Text style={styles.sectionTitle}>历史分析</Text>
+            <Text style={styles.sectionTitle}>{t.feedback.historyTitle}</Text>
             {previousAnalyses.slice(0, 10).map((a) => (
               <TouchableOpacity key={a.id} style={styles.historyCard} onPress={() => openSaved(a)}>
                 <Text style={styles.historyPeriod}>
@@ -240,7 +241,7 @@ export default function FeedbackScreen() {
                 <Text style={styles.historySummary} numberOfLines={2}>
                   {a.summary}
                 </Text>
-                <Text style={styles.historyScore}>对齐度：{a.alignment_score}</Text>
+                <Text style={styles.historyScore}>{t.feedback.historyScore(a.alignment_score)}</Text>
               </TouchableOpacity>
             ))}
           </View>

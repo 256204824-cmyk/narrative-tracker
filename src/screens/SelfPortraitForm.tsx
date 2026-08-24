@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RatingScale from '../components/RatingScale';
-import { SELF_PORTRAIT_QUESTIONS } from '../constants/questions';
+import { PORTRAIT_SCALE_IDS, PORTRAIT_TEXT_IDS } from '../constants/questions';
+import { useT } from '../i18n/useT';
 import { saveSelfPortrait } from '../database';
 import { notify } from '../utils/dialog';
 import type { SelfPortrait } from '../types';
@@ -50,17 +51,18 @@ export default function SelfPortraitForm({
   onSaved,
   onCancel,
 }: Props) {
-  const scaleQuestions = SELF_PORTRAIT_QUESTIONS.filter((q) => q.type === 'scale');
-  const textQuestions = SELF_PORTRAIT_QUESTIONS.filter((q) => q.type === 'text');
+  const t = useT();
+  const scaleQuestions = PORTRAIT_SCALE_IDS;
+  const textQuestions = PORTRAIT_TEXT_IDS;
 
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
   const [scores, setScores] = useState<Record<string, number>>(() =>
     Object.fromEntries(
-      scaleQuestions.map((q) => {
-        const col = SCALE_COLUMN[q.id as keyof typeof SCALE_COLUMN];
-        return [q.id, initial && col ? initial[col] : 5];
+      scaleQuestions.map((id) => {
+        const col = SCALE_COLUMN[id];
+        return [id, initial && col ? initial[col] : 5];
       })
     )
   );
@@ -68,17 +70,17 @@ export default function SelfPortraitForm({
   // 用 id 索引的记录，而不是每个字段一条 useState —— 题库加题时不会静默失效
   const [texts, setTexts] = useState<Record<string, string>>(() =>
     Object.fromEntries(
-      textQuestions.map((q) => {
-        const col = TEXT_COLUMN[q.id as keyof typeof TEXT_COLUMN];
-        return [q.id, initial && col ? initial[col] : ''];
+      textQuestions.map((id) => {
+        const col = TEXT_COLUMN[id];
+        return [id, initial && col ? initial[col] : ''];
       })
     )
   );
 
   const handleFinish = async () => {
-    const missing = textQuestions.filter((q) => !(texts[q.id] ?? '').trim());
+    const missing = textQuestions.filter((id) => !(texts[id] ?? '').trim());
     if (missing.length > 0) {
-      notify('请填写所有问题', '每个问题都能帮助 AI 更好地理解你。');
+      notify(t.portrait.incompleteTitle, t.portrait.incompleteBody);
       return;
     }
 
@@ -95,7 +97,7 @@ export default function SelfPortraitForm({
       });
       onSaved();
     } catch (err) {
-      notify('保存失败', '请重试');
+      notify(t.portrait.saveFailed, t.common.retry);
     } finally {
       setSaving(false);
     }
@@ -103,7 +105,7 @@ export default function SelfPortraitForm({
 
   // ── 量表阶段 ──
   if (step < scaleQuestions.length) {
-    const q = scaleQuestions[step];
+    const id = scaleQuestions[step];
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.container}>
@@ -117,25 +119,25 @@ export default function SelfPortraitForm({
             <Text style={styles.subtitle}>{subtitle}</Text>
             <View style={styles.card}>
               <RatingScale
-                label={q.question}
-                value={scores[q.id] ?? 5}
-                onChange={(v) => setScores((prev) => ({ ...prev, [q.id]: v }))}
+                label={t.questions.portrait[id]}
+                value={scores[id] ?? 5}
+                onChange={(v) => setScores((prev) => ({ ...prev, [id]: v }))}
               />
             </View>
           </View>
           <View style={styles.buttons}>
             {step > 0 ? (
               <TouchableOpacity style={styles.btnSecondary} onPress={() => setStep(step - 1)}>
-                <Text style={styles.btnSecondaryText}>上一题</Text>
+                <Text style={styles.btnSecondaryText}>{t.common.prev}</Text>
               </TouchableOpacity>
             ) : onCancel ? (
               <TouchableOpacity style={styles.btnSecondary} onPress={onCancel}>
-                <Text style={styles.btnSecondaryText}>取消</Text>
+                <Text style={styles.btnSecondaryText}>{t.common.cancel}</Text>
               </TouchableOpacity>
             ) : null}
             <TouchableOpacity style={styles.btnPrimary} onPress={() => setStep(step + 1)}>
               <Text style={styles.btnPrimaryText}>
-                {step === scaleQuestions.length - 1 ? '继续填写' : '下一题'}
+                {step === scaleQuestions.length - 1 ? t.portrait.continueToText : t.common.next}
               </Text>
             </TouchableOpacity>
           </View>
@@ -161,19 +163,19 @@ export default function SelfPortraitForm({
               {scaleQuestions.length + 1} / {scaleQuestions.length + 1}
             </Text>
           </View>
-          <Text style={styles.title}>再多了解你一点</Text>
-          <Text style={styles.subtitle}>用你自己的话来描述自己。</Text>
+          <Text style={styles.title}>{t.portrait.textPhaseTitle}</Text>
+          <Text style={styles.subtitle}>{t.portrait.textPhaseSubtitle}</Text>
 
-          {textQuestions.map((q) => (
-            <View key={q.id} style={styles.textCard}>
-              <Text style={styles.questionLabel}>{q.question}</Text>
+          {textQuestions.map((id) => (
+            <View key={id} style={styles.textCard}>
+              <Text style={styles.questionLabel}>{t.questions.portrait[id]}</Text>
               <TextInput
                 style={styles.textInput}
-                placeholder="写下你的真实想法..."
+                placeholder={t.portrait.textPlaceholder}
                 placeholderTextColor="#bbb"
                 multiline
-                value={texts[q.id] ?? ''}
-                onChangeText={(text) => setTexts((prev) => ({ ...prev, [q.id]: text }))}
+                value={texts[id] ?? ''}
+                onChangeText={(text) => setTexts((prev) => ({ ...prev, [id]: text }))}
               />
             </View>
           ))}
@@ -183,11 +185,11 @@ export default function SelfPortraitForm({
             onPress={handleFinish}
             disabled={saving}
           >
-            <Text style={styles.btnSubmitText}>{saving ? '保存中...' : submitLabel}</Text>
+            <Text style={styles.btnSubmitText}>{saving ? t.common.saving : submitLabel}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.btnBack} onPress={() => setStep(scaleQuestions.length - 1)}>
-            <Text style={styles.btnBackText}>返回上一题</Text>
+            <Text style={styles.btnBackText}>{t.portrait.backOneStep}</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

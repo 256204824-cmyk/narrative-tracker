@@ -4,6 +4,7 @@
 // 一律不信任：逐字段检查并给出人能看懂的错误，宁可拒绝也不要把坏数据写进库。
 
 import { EXPORT_FORMAT_VERSION } from '../constants/format.ts';
+import { t } from '../i18n/catalog.ts';
 import type { SelfPortrait, FactLog, AnalysisResult } from '../types';
 
 export interface ValidatedImport {
@@ -43,19 +44,16 @@ export function validateImport(raw: string): ValidationResult {
   try {
     parsed = JSON.parse(raw);
   } catch {
-    return { ok: false, error: '这不是一个有效的 JSON 文件。' };
+    return { ok: false, error: t().importValidation.notJson };
   }
 
   if (!isObj(parsed)) {
-    return { ok: false, error: '文件格式不对：顶层应该是一个对象。' };
+    return { ok: false, error: t().importValidation.notObject };
   }
 
   const version = parsed.format_version;
   if (typeof version === 'number' && version > EXPORT_FORMAT_VERSION) {
-    return {
-      ok: false,
-      error: `这个文件由更新版本的 App 导出（格式 v${version}，当前支持 v${EXPORT_FORMAT_VERSION}）。请先升级 App。`,
-    };
+    return { ok: false, error: t().importValidation.tooNew(version, EXPORT_FORMAT_VERSION) };
   }
 
   const portraitsRaw = parsed.self_portraits;
@@ -63,20 +61,17 @@ export function validateImport(raw: string): ValidationResult {
   const analysesRaw = parsed.analysis_results;
 
   if (!Array.isArray(portraitsRaw) || !Array.isArray(factsRaw)) {
-    return {
-      ok: false,
-      error: '文件里没有找到 self_portraits 和 fact_logs，这可能不是 Narrative Tracker 导出的数据。',
-    };
+    return { ok: false, error: t().importValidation.missingFields };
   }
 
   if (portraitsRaw.length === 0 && factsRaw.length === 0) {
-    return { ok: false, error: '这个文件里没有任何自我画像或事实记录。' };
+    return { ok: false, error: t().importValidation.emptyData };
   }
 
   const self_portraits: SelfPortrait[] = [];
   for (let i = 0; i < portraitsRaw.length; i++) {
     const p = portraitsRaw[i];
-    if (!isObj(p)) return { ok: false, error: `第 ${i + 1} 条自我画像不是一个对象。` };
+    if (!isObj(p)) return { ok: false, error: t().importValidation.portraitNotObject(i + 1) };
     self_portraits.push({
       id: 0,
       discipline_score: intInRange(p.discipline_score, 1, 10, 5),
@@ -93,13 +88,13 @@ export function validateImport(raw: string): ValidationResult {
   const fact_logs: FactLog[] = [];
   for (let i = 0; i < factsRaw.length; i++) {
     const f = factsRaw[i];
-    if (!isObj(f)) return { ok: false, error: `第 ${i + 1} 条事实记录不是一个对象。` };
+    if (!isObj(f)) return { ok: false, error: t().importValidation.factNotObject(i + 1) };
     const date = str(f.date);
     // date 是范围筛选和 tier 限制的依据，格式错了整个分析都会失效，必须拒绝
     if (!DATE_RE.test(date)) {
       return {
         ok: false,
-        error: `第 ${i + 1} 条事实记录的日期「${date || '(空)'}」格式不对，应该是 YYYY-MM-DD。`,
+        error: t().importValidation.badDate(i + 1, date || t().importValidation.emptyDateLabel),
       };
     }
     fact_logs.push({

@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProvider, useAppState } from './src/store/AppContext';
+import { useT } from './src/i18n/useT';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreenWrapper from './src/screens/HomeScreen';
 import FeedbackScreen from './src/screens/FeedbackScreen';
@@ -31,6 +32,7 @@ function SettingsTab({ navigation }: any) {
 }
 
 function MainTabs() {
+  const t = useT();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -50,17 +52,17 @@ function MainTabs() {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ tabBarLabel: '事实日志' }}
+        options={{ tabBarLabel: t.tabs.home }}
       />
       <Tab.Screen
         name="Feedback"
         component={FeedbackScreen}
-        options={{ tabBarLabel: '审计报告' }}
+        options={{ tabBarLabel: t.tabs.feedback }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsTab}
-        options={{ tabBarLabel: '设置' }}
+        options={{ tabBarLabel: t.tabs.settings }}
       />
     </Tab.Navigator>
   );

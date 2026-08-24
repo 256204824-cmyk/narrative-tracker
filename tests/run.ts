@@ -9,7 +9,11 @@ import { normalizeBaseUrl, checkBaseUrl } from '../src/services/providerUrl.ts';
 
 const DEFAULT_BASE_URL = 'https://api.openai.com/v1';
 import { validateImport } from '../src/utils/importValidation.ts';
-import { TIER_LIMITS, MIN_DAYS_FOR_ANALYSIS } from '../src/constants/questions.ts';
+import { TIER_LIMITS, MIN_DAYS_FOR_ANALYSIS, tagLabel, normalizeTag, TAG_IDS } from '../src/constants/questions.ts';
+import { zh } from '../src/i18n/zh.ts';
+import { en } from '../src/i18n/en.ts';
+import { messagesFor, setActiveLocale, resolveLocaleTag, t as activeMessages } from '../src/i18n/catalog.ts';
+import { SUPPORTED_LOCALES } from '../src/i18n/types.ts';
 
 let passed = 0;
 let failed = 0;
@@ -133,6 +137,59 @@ group('导入校验', () => {
     check('标签原样保留', roundtrip.data.fact_logs[0].category_tags, '["学习"]');
     check('分数原样保留', roundtrip.data.self_portraits[0].discipline_score, 8);
   }
+});
+
+// ────────────────────────────────────────────────
+group('多语言', () => {
+  // 递归比对两套文案的键，防止漏译（类型系统已覆盖，这里再兜一层运行时）
+  const shape = (o: unknown, prefix = ''): string[] => {
+    if (typeof o === 'function') return [`${prefix}()`];
+    if (Array.isArray(o)) return [`${prefix}[]`];
+    if (o && typeof o === 'object') {
+      return Object.entries(o).flatMap(([k, v]) => shape(v, prefix ? `${prefix}.${k}` : k));
+    }
+    return [prefix];
+  };
+  check('zh 与 en 的键完全一致', shape(en).sort(), shape(zh).sort());
+
+  for (const loc of SUPPORTED_LOCALES) {
+    const m = messagesFor(loc);
+    ok(`${loc} 有语言名`, m.locale.name.length > 0);
+    ok(`${loc} 有 AI 语言指令`, m.locale.aiInstruction.length > 0);
+    ok(`${loc} 隐私承诺 5 条`, m.settings.privacyLines.length === 5);
+    // 每个标签 id 都要有译名，否则 prompt 里会漏出裸 id
+    ok(`${loc} 标签全部有译名`, TAG_IDS.every((id) => !!(m.questions.tags as Record<string, string>)[id]));
+  }
+
+  // 文案确实随语言切换
+  ok('zh 与 en 的标题不同', zh.home.title !== en.home.title);
+  ok('带参文案也切换', zh.home.counted(3) !== en.home.counted(3));
+
+  check('语言标签收敛 zh-Hans-CN', resolveLocaleTag('zh-Hans-CN'), 'zh');
+  check('语言标签收敛 en-US', resolveLocaleTag('en-US'), 'en');
+  check('不支持的语言返回 null', resolveLocaleTag('fr-FR'), null);
+  check('空值返回 null', resolveLocaleTag(null), null);
+
+  // 模块级当前语言
+  setActiveLocale('zh');
+  check('t() 跟随 setActiveLocale(zh)', activeMessages().home.title, zh.home.title);
+  setActiveLocale('en');
+  check('t() 跟随 setActiveLocale(en)', activeMessages().home.title, en.home.title);
+});
+
+// ────────────────────────────────────────────────
+group('标签 id 与旧数据兼容', () => {
+  check('旧中文标签映射回 id', normalizeTag('学习'), 'study');
+  check('id 保持不变', normalizeTag('study'), 'study');
+  check('未知值原样返回', normalizeTag('whatever'), 'whatever');
+
+  setActiveLocale('zh');
+  check('中文界面下 id 显示中文', tagLabel('study'), '学习');
+  check('中文界面下旧数据也显示中文', tagLabel('学习'), '学习');
+  setActiveLocale('en');
+  check('英文界面下 id 显示英文', tagLabel('study'), 'Study');
+  // 关键：旧记录存的是中文名，切到英文后也必须显示英文，否则统计会分裂
+  check('英文界面下旧数据显示英文', tagLabel('学习'), 'Study');
 });
 
 console.log(`\n${'═'.repeat(40)}`);

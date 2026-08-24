@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useT } from '../i18n/useT';
 
 interface Props {
   alignmentScore: number;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export default function GapIndicator({ alignmentScore, confidence }: Props) {
+  const t = useT();
   // 兜底：分数若越界会把进度条宽度撑坏
   const score = Math.min(100, Math.max(0, Math.round(alignmentScore || 0)));
 
@@ -17,23 +19,23 @@ export default function GapIndicator({ alignmentScore, confidence }: Props) {
   };
 
   const getLabel = () => {
-    if (score >= 80) return '高度一致';
-    if (score >= 50) return '部分一致';
-    return '差距较大';
+    if (score >= 80) return t.feedback.highMatch;
+    if (score >= 50) return t.feedback.partialMatch;
+    return t.feedback.lowMatch;
   };
 
   const getConfidenceLabel = () => {
     switch (confidence) {
-      case 'high': return '置信度高';
-      case 'medium': return '置信度中';
-      case 'low': return '置信度低';
+      case 'high': return t.feedback.confidenceHigh;
+      case 'medium': return t.feedback.confidenceMedium;
+      case 'low': return t.feedback.confidenceLow;
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.scoreRow}>
-        <Text style={styles.label}>叙事-行为对齐度</Text>
+        <Text style={styles.label}>{t.feedback.alignment}</Text>
         <Text style={[styles.score, { color: getColor() }]}>{score}</Text>
       </View>
       <View style={styles.barBg}>

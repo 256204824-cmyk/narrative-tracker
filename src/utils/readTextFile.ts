@@ -4,8 +4,10 @@
 // expo-file-system 的 File 无法处理（会抛 validatePath is not a function），
 // 用 fetch 读取才是正确做法。
 
+import { t } from '../i18n';
+
 export async function readTextFile(uri: string): Promise<string> {
   const res = await fetch(uri);
-  if (!res.ok) throw new Error(`读取文件失败 (${res.status})`);
+  if (!res.ok) throw new Error(t().importValidation.readFailed(res.status));
   return res.text();
 }

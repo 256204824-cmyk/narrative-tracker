@@ -31,7 +31,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "计划9点开始，实际10点40才坐下",
     "one_line_fact": "今天的问题不是没做，是开始得太晚",
-    "category_tags": "[\"学习\",\"拖延\"]"
+    "category_tags": "[\"study\",\"procrastination\"]"
   },
   {
     "date": "2026-07-26",
@@ -41,7 +41,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "把习题推到了明天",
     "representative_fact": "看完课觉得懂了，但没验证",
     "one_line_fact": "听课的舒适感骗了我",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-07-27",
@@ -51,7 +51,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "整天在刷短视频，晚上才意识到",
     "representative_fact": "周日什么都没做",
     "one_line_fact": "今天完全空白",
-    "category_tags": "[\"拖延\",\"情绪\"]"
+    "category_tags": "[\"procrastination\",\"emotion\"]"
   },
   {
     "date": "2026-07-28",
@@ -61,7 +61,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "补作业让我觉得踏实",
     "one_line_fact": "欠的债还上了一部分",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-07-29",
@@ -71,7 +71,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "跑完步学习效率明显更高",
     "one_line_fact": "运动没有耽误学习，反而帮了忙",
-    "category_tags": "[\"学习\",\"健康\"]"
+    "category_tags": "[\"study\",\"health\"]"
   },
   {
     "date": "2026-07-30",
@@ -81,7 +81,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "一想到写简历就去做别的事",
     "representative_fact": "拖了六天的章节今天开了头",
     "one_line_fact": "逃避的是简历，不是学习",
-    "category_tags": "[\"学习\",\"健康\",\"拖延\"]"
+    "category_tags": "[\"study\",\"health\",\"procrastination\"]"
   },
   {
     "date": "2026-07-31",
@@ -91,7 +91,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "计划9点开始，实际9点20",
     "one_line_fact": "开始时间比上周准了很多",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-08-01",
@@ -101,7 +101,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "周六又是学习空白",
     "one_line_fact": "运动的连续性比学习强",
-    "category_tags": "[\"健康\",\"拖延\"]"
+    "category_tags": "[\"health\",\"procrastination\"]"
   },
   {
     "date": "2026-08-02",
@@ -111,7 +111,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "周日又空了",
     "one_line_fact": "连续两个周日都是空的",
-    "category_tags": "[\"拖延\"]"
+    "category_tags": "[\"procrastination\"]"
   },
   {
     "date": "2026-08-03",
@@ -121,7 +121,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "",
-    "category_tags": "[\"学习\",\"健康\"]"
+    "category_tags": "[\"study\",\"health\"]"
   },
   {
     "date": "2026-08-04",
@@ -131,7 +131,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "阅读似乎真的稳住了",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-08-05",
@@ -141,7 +141,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "每次打开简历模板就关掉",
     "representative_fact": "简历这件事我已经逃避了九天",
     "one_line_fact": "这是我最明显的逃避",
-    "category_tags": "[\"学习\",\"健康\",\"拖延\"]"
+    "category_tags": "[\"study\",\"health\",\"procrastination\"]"
   },
   {
     "date": "2026-08-06",
@@ -151,7 +151,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-08-07",
@@ -161,7 +161,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "开始比写好更重要",
-    "category_tags": "[\"学习\",\"健康\"]"
+    "category_tags": "[\"study\",\"health\"]"
   },
   {
     "date": "2026-08-08",
@@ -171,7 +171,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "周末的空白在变小",
-    "category_tags": "[\"健康\"]"
+    "category_tags": "[\"health\"]"
   },
   {
     "date": "2026-08-09",
@@ -181,7 +181,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "连续空白的周末被打断了",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-08-10",
@@ -191,7 +191,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "",
-    "category_tags": "[\"学习\",\"健康\"]"
+    "category_tags": "[\"study\",\"health\"]"
   },
   {
     "date": "2026-08-11",
@@ -201,7 +201,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "半个月了，简历一个字没写",
     "one_line_fact": "其他事都在推进，只有简历卡死",
-    "category_tags": "[\"学习\",\"拖延\"]"
+    "category_tags": "[\"study\",\"procrastination\"]"
   },
   {
     "date": "2026-08-12",
@@ -211,7 +211,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "连续12天的跑步断了",
     "one_line_fact": "断了之后有点想放弃",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-08-13",
@@ -221,7 +221,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "断一天不等于结束",
-    "category_tags": "[\"学习\",\"健康\"]"
+    "category_tags": "[\"study\",\"health\"]"
   },
   {
     "date": "2026-08-14",
@@ -231,7 +231,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-08-15",
@@ -241,7 +241,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "周末不再是全空",
-    "category_tags": "[\"学习\",\"健康\"]"
+    "category_tags": "[\"study\",\"health\"]"
   },
   {
     "date": "2026-08-16",
@@ -251,7 +251,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "列清单比写简历容易，但总算碰了",
     "one_line_fact": "逃避的边缘被推动了一点",
-    "category_tags": "[\"学习\",\"拖延\"]"
+    "category_tags": "[\"study\",\"procrastination\"]"
   },
   {
     "date": "2026-08-17",
@@ -261,7 +261,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "",
-    "category_tags": "[\"学习\",\"健康\"]"
+    "category_tags": "[\"study\",\"health\"]"
   },
   {
     "date": "2026-08-18",
@@ -271,7 +271,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "18天之后，简历终于有了三行字",
     "one_line_fact": "原来只是开始那一下最难",
-    "category_tags": "[\"学习\",\"拖延\"]"
+    "category_tags": "[\"study\",\"procrastination\"]"
   },
   {
     "date": "2026-08-19",
@@ -281,7 +281,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "连续做两天就没那么抗拒了",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   },
   {
     "date": "2026-08-20",
@@ -291,7 +291,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "今天是这个月完成度最高的一天",
     "one_line_fact": "",
-    "category_tags": "[\"学习\",\"健康\"]"
+    "category_tags": "[\"study\",\"health\"]"
   },
   {
     "date": "2026-08-21",
@@ -301,7 +301,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "拖了18天的事，真做起来只花了4天",
     "one_line_fact": "拖延的成本远高于做事本身",
-    "category_tags": "[\"学习\",\"拖延\"]"
+    "category_tags": "[\"study\",\"procrastination\"]"
   },
   {
     "date": "2026-08-22",
@@ -311,7 +311,7 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "",
     "one_line_fact": "周六不再是空白",
-    "category_tags": "[\"健康\",\"工作\"]"
+    "category_tags": "[\"health\",\"work\"]"
   },
   {
     "date": "2026-08-23",
@@ -321,6 +321,6 @@ export const DEMO_FACTS: Array<Omit<FactLog, 'id' | 'created_at'>> = [
     "avoidance_text": "",
     "representative_fact": "回看这个月，空白的都是周末",
     "one_line_fact": "",
-    "category_tags": "[\"学习\"]"
+    "category_tags": "[\"study\"]"
   }
 ];

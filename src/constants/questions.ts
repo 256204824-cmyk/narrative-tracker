@@ -1,77 +1,4 @@
-// PRD Section 3.1 — Initial self-portrait questions
-export const SELF_PORTRAIT_QUESTIONS = [
-  {
-    id: 'discipline',
-    question: '你觉得自己是一个自律的人吗？',
-    type: 'scale' as const,
-  },
-  {
-    id: 'engagement',
-    question: '你觉得自己最近学习或工作的投入度如何？',
-    type: 'scale' as const,
-  },
-  {
-    id: 'procrastination',
-    question: '你觉得自己拖延严重吗？',
-    type: 'scale' as const,
-  },
-  {
-    id: 'persistence',
-    question: '你觉得自己能坚持长期目标吗？',
-    type: 'scale' as const,
-  },
-  {
-    id: 'strength',
-    question: '你觉得自己最近最大的优势是什么？',
-    type: 'text' as const,
-  },
-  {
-    id: 'change',
-    question: '你觉得自己最近最想改变的问题是什么？',
-    type: 'text' as const,
-  },
-  {
-    id: 'self_words',
-    question: '用三个词描述现在的自己。',
-    type: 'text' as const,
-  },
-];
-
-// PRD Section 3.2 — Daily fact submission questions
-export const FACT_LOG_QUESTIONS = [
-  {
-    id: 'completed',
-    question: '今天你实际完成了什么？',
-    hint: '列出具体的事情，哪怕很小',
-  },
-  {
-    id: 'uncompleted',
-    question: '今天你原本计划做但没有做的事情是什么？',
-    hint: '诚实面对计划落差',
-  },
-  {
-    id: 'progress',
-    question: '今天有没有一件事证明你在靠近目标？',
-    hint: '哪怕是很小的进展',
-  },
-  {
-    id: 'avoidance',
-    question: '今天有没有一次明显的逃避？',
-    hint: '你回避了什么，为什么',
-  },
-  {
-    id: 'representative',
-    question: '今天最能代表你真实状态的事实是什么？',
-    hint: '不用修饰，写最真实的那件',
-  },
-  {
-    id: 'one_line',
-    question: '如果只能写一句事实，你会写什么？',
-    hint: '一句话总结今天的关键事实',
-  },
-];
-
-export const CATEGORY_TAGS = ['学习', '工作', '健康', '社交', '情绪', '拖延', '自律', '其他'];
+import { t } from '../i18n/catalog.ts';
 
 // 生成一次分析所需的最少「不同日子」数量。
 // 同一天写多条不能说明任何跨时间的模式（PRD 5.2）。
@@ -89,3 +16,65 @@ export const TIER_LIMITS: Record<string, number> = {
   plus: 30,
   pro: 365,
 };
+
+// 题目的 id 与结构在此定义，文案在 i18n 里。
+// id 同时是数据库列名的来源，**改 id 等于改 schema**，不要随意改动。
+
+export const PORTRAIT_SCALE_IDS = [
+  'discipline',
+  'engagement',
+  'procrastination',
+  'persistence',
+] as const;
+
+export const PORTRAIT_TEXT_IDS = ['strength', 'change', 'self_words'] as const;
+
+export const FACT_IDS = [
+  'completed',
+  'uncompleted',
+  'progress',
+  'avoidance',
+  'representative',
+  'one_line',
+] as const;
+
+export const TAG_IDS = [
+  'study', 'work', 'health', 'social',
+  'emotion', 'procrastination', 'discipline', 'other',
+] as const;
+
+export type PortraitScaleId = (typeof PORTRAIT_SCALE_IDS)[number];
+export type PortraitTextId = (typeof PORTRAIT_TEXT_IDS)[number];
+export type FactId = (typeof FACT_IDS)[number];
+export type TagId = (typeof TAG_IDS)[number];
+
+/**
+ * 多语言之前的版本把中文显示名直接存进了库，
+ * 这里把它们映射回 id，否则老记录的标签统计会和新记录对不上。
+ */
+const LEGACY_TAG_ALIASES: Record<string, TagId> = {
+  学习: 'study',
+  工作: 'work',
+  健康: 'health',
+  社交: 'social',
+  情绪: 'emotion',
+  拖延: 'procrastination',
+  自律: 'discipline',
+  其他: 'other',
+};
+
+/** 把库里的标签值收敛成 id（兼容旧数据） */
+export function normalizeTag(raw: string): string {
+  return LEGACY_TAG_ALIASES[raw] ?? raw;
+}
+
+/**
+ * 标签在数据库里存的是 id（如 'study'），不是显示文案。
+ *
+ * 存显示文案的话，用户切换语言后旧记录的标签会和新标签对不上，
+ * 统计就断了 —— 而那正是 AI prompt 里主题计数的依据。
+ */
+export function tagLabel(raw: string): string {
+  const tags = t().questions.tags as Record<string, string>;
+  return tags[normalizeTag(raw)] ?? raw;
+}

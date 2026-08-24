@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { FactLog } from '../types';
+import { useT } from '../i18n/useT';
+import { tagLabel } from '../constants/questions';
 
 interface Props {
   fact: FactLog;
 }
 
 export default function FactCard({ fact }: Props) {
+  const t = useT();
   const tags: string[] = (() => {
     try {
       return JSON.parse(fact.category_tags);
@@ -23,7 +26,7 @@ export default function FactCard({ fact }: Props) {
           <View style={styles.tags}>
             {tags.map((tag) => (
               <View key={tag} style={styles.tag}>
-                <Text style={styles.tagText}>{tag}</Text>
+                <Text style={styles.tagText}>{tagLabel(tag)}</Text>
               </View>
             ))}
           </View>
@@ -34,31 +37,31 @@ export default function FactCard({ fact }: Props) {
       ) : null}
       {fact.completed_text ? (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>完成了</Text>
+          <Text style={styles.sectionLabel}>{t.fact.completed}</Text>
           <Text style={styles.sectionText}>{fact.completed_text}</Text>
         </View>
       ) : null}
       {fact.uncompleted_text ? (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>未完成</Text>
+          <Text style={styles.sectionLabel}>{t.fact.uncompleted}</Text>
           <Text style={styles.sectionText}>{fact.uncompleted_text}</Text>
         </View>
       ) : null}
       {fact.progress_evidence ? (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>靠近目标</Text>
+          <Text style={styles.sectionLabel}>{t.fact.progress}</Text>
           <Text style={styles.sectionText}>{fact.progress_evidence}</Text>
         </View>
       ) : null}
       {fact.avoidance_text ? (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>逃避</Text>
+          <Text style={styles.sectionLabel}>{t.fact.avoidance}</Text>
           <Text style={styles.sectionText}>{fact.avoidance_text}</Text>
         </View>
       ) : null}
       {fact.representative_fact ? (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>最有代表性</Text>
+          <Text style={styles.sectionLabel}>{t.fact.representative}</Text>
           <Text style={styles.sectionText}>{fact.representative_fact}</Text>
         </View>
       ) : null}

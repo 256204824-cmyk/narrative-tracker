@@ -7,16 +7,18 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  Alert,
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FactCard from '../components/FactCard';
-import { FACT_LOG_QUESTIONS, CATEGORY_TAGS } from '../constants/questions';
+import { FACT_IDS, TAG_IDS, tagLabel } from '../constants/questions';
+import { useT } from '../i18n/useT';
+import { useAppState } from '../store/AppContext';
 import { saveFactLog, getAllFactLogs } from '../database';
 import type { FactLog } from '../types';
+import { notify } from '../utils/dialog';
 import { today } from '../utils/date';
 
 interface Props {
@@ -24,6 +26,8 @@ interface Props {
 }
 
 export default function HomeScreen({ onNavigateToFeedback }: Props) {
+  const t = useT();
+  const { locale } = useAppState();
   const [showForm, setShowForm] = useState(false);
   const [facts, setFacts] = useState<FactLog[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,7 +62,7 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
   const handleSubmit = async () => {
     const hasAnyField = Object.values(formData).some((v) => v.trim().length > 0);
     if (!hasAnyField) {
-      Alert.alert('请至少填写一项', '即使是简单的一句话也很重要。');
+      notify(t.home.needOneFieldTitle, t.home.needOneFieldBody);
       return;
     }
 
@@ -78,7 +82,7 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
       setShowForm(false);
       await loadFacts();
     } catch (err) {
-      Alert.alert('保存失败', '请重试');
+      notify(t.home.saveFailed, t.common.retry);
     }
   };
 
@@ -94,23 +98,23 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
         contentContainerStyle={styles.scrollContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <Text style={styles.title}>事实日志</Text>
+        <Text style={styles.title}>{t.home.title}</Text>
         <Text style={styles.subtitle}>
           {facts.length > 0
-            ? `已记录 ${facts.length} 条事实`
-            : '记录你的真实行动，不评判，只观察。'}
+            ? t.home.counted(facts.length)
+            : t.home.empty}
         </Text>
 
         {!showForm && (
           <TouchableOpacity style={styles.addBtn} onPress={() => setShowForm(true)}>
-            <Text style={styles.addBtnText}>+ 记录今天的事实</Text>
+            <Text style={styles.addBtnText}>{t.home.add}</Text>
           </TouchableOpacity>
         )}
 
         {showForm && (
           <View style={styles.formCard}>
             <Text style={styles.formTitle}>
-              {new Date().toLocaleDateString('zh-CN', {
+              {new Date().toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -118,30 +122,30 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
               })}
             </Text>
 
-            {FACT_LOG_QUESTIONS.map((q) => (
-              <View key={q.id} style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>{q.question}</Text>
+            {FACT_IDS.map((id) => (
+              <View key={id} style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>{t.questions.fact[id].q}</Text>
                 <TextInput
                   style={styles.fieldInput}
-                  placeholder={q.hint}
+                  placeholder={t.questions.fact[id].hint}
                   placeholderTextColor="#bbb"
                   multiline
-                  value={formData[q.id] || ''}
-                  onChangeText={(text) => setFormData((prev) => ({ ...prev, [q.id]: text }))}
+                  value={formData[id] || ''}
+                  onChangeText={(text) => setFormData((prev) => ({ ...prev, [id]: text }))}
                 />
               </View>
             ))}
 
-            <Text style={styles.fieldLabel}>分类标签（可选）</Text>
+            <Text style={styles.fieldLabel}>{t.home.tagsLabel}</Text>
             <View style={styles.tagsContainer}>
-              {CATEGORY_TAGS.map((tag) => (
+              {TAG_IDS.map((id) => (
                 <TouchableOpacity
-                  key={tag}
-                  style={[styles.tagBtn, selectedTags.includes(tag) && styles.tagBtnSelected]}
-                  onPress={() => toggleTag(tag)}
+                  key={id}
+                  style={[styles.tagBtn, selectedTags.includes(id) && styles.tagBtnSelected]}
+                  onPress={() => toggleTag(id)}
                 >
-                  <Text style={[styles.tagBtnText, selectedTags.includes(tag) && styles.tagBtnTextSelected]}>
-                    {tag}
+                  <Text style={[styles.tagBtnText, selectedTags.includes(id) && styles.tagBtnTextSelected]}>
+                    {tagLabel(id)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -156,10 +160,10 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
                   setSelectedTags([]);
                 }}
               >
-                <Text style={styles.cancelBtnText}>取消</Text>
+                <Text style={styles.cancelBtnText}>{t.common.cancel}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-                <Text style={styles.submitBtnText}>保存事实</Text>
+                <Text style={styles.submitBtnText}>{t.home.submit}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -168,9 +172,9 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
         {facts.length > 0 && (
           <>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>历史记录</Text>
+              <Text style={styles.sectionTitle}>{t.home.historyTitle}</Text>
               <TouchableOpacity onPress={onNavigateToFeedback}>
-                <Text style={styles.analyzeLink}>查看分析</Text>
+                <Text style={styles.analyzeLink}>{t.home.viewAnalysis}</Text>
               </TouchableOpacity>
             </View>
             {facts.map((fact) => (

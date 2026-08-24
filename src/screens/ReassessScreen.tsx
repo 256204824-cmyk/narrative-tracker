@@ -3,6 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import SelfPortraitForm from './SelfPortraitForm';
 import { getLatestSelfPortrait } from '../database';
 import { notify } from '../utils/dialog';
+import { useT } from '../i18n/useT';
 import type { SelfPortrait } from '../types';
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
  * 只留最新一版等于把它丢掉。
  */
 export default function ReassessScreen({ onDone }: Props) {
+  const t = useT();
   const [latest, setLatest] = useState<SelfPortrait | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,11 +45,11 @@ export default function ReassessScreen({ onDone }: Props) {
   return (
     <SelfPortraitForm
       initial={latest}
-      title="重新评价自己"
-      subtitle="按你现在的感受回答，不用参考上一次。"
-      submitLabel="保存这一版画像"
+      title={t.portrait.reassessTitle}
+      subtitle={t.portrait.reassessSubtitle}
+      submitLabel={t.portrait.reassessSubmit}
       onSaved={() => {
-        notify('已保存', '这一版画像已记录，上一版仍然保留。');
+        notify(t.common.saved, t.portrait.reassessSavedBody);
         onDone();
       }}
       onCancel={onDone}

@@ -18,6 +18,9 @@ import { importAllData } from '../database';
 import { validateImport } from '../utils/importValidation';
 import * as DocumentPicker from 'expo-document-picker';
 import { readTextFile } from '../utils/readTextFile';
+import { useT } from '../i18n/useT';
+import { TIER_LIMITS } from '../constants/questions';
+import { SUPPORTED_LOCALES, messagesFor, type LocalePreference } from '../i18n';
 import { today } from '../utils/date';
 import { notify, confirmDestructive } from '../utils/dialog';
 import type { SelfPortrait } from '../types';
@@ -30,10 +33,10 @@ import {
 } from '../services/provider';
 import type { Tier } from '../types';
 
-const TIERS: { key: Tier; label: string; desc: string }[] = [
-  { key: 'free', label: 'Free', desc: '最近 7 天反馈' },
-  { key: 'plus', label: 'Plus', desc: '最近 1 个月反馈' },
-  { key: 'pro', label: 'Pro', desc: '最近 1 年反馈' },
+const TIERS: { key: Tier; label: string }[] = [
+  { key: 'free', label: 'Free' },
+  { key: 'plus', label: 'Plus' },
+  { key: 'pro', label: 'Pro' },
 ];
 
 interface Props {
@@ -41,7 +44,9 @@ interface Props {
 }
 
 export default function SettingsScreen({ onReassess }: Props) {
-  const { apiKey, setApiKey, removeApiKey, tier, setTier, setOnboardingDone } = useAppState();
+  const t = useT();
+  const { apiKey, setApiKey, removeApiKey, tier, setTier, setOnboardingDone,
+    localePreference, setLocalePreference } = useAppState();
   const [keyInput, setKeyInput] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [factCount, setFactCount] = useState(0);
@@ -71,40 +76,40 @@ export default function SettingsScreen({ onReassess }: Props) {
   const handleSaveKey = async () => {
     const trimmed = keyInput.trim();
     if (!trimmed) {
-      notify('请输入有效的 API Key');
+      notify(t.settings.keyInvalid);
       return;
     }
     await setApiKey(trimmed);
     setKeyInput('');
     setShowKeyInput(false);
-    notify('已保存', 'API Key 已安全存储在设备中。');
+    notify(t.common.saved, t.settings.keySavedBody);
   };
 
   const handleRemoveKey = async () => {
     const ok = await confirmDestructive(
-      '删除 API Key',
-      '删除后将无法使用 AI 分析功能。确定删除？',
-      '删除'
+      t.settings.keyRemoveTitle,
+      t.settings.keyRemoveBody,
+      t.common.delete
     );
     if (!ok) return;
     await removeApiKey();
-    notify('已删除');
+    notify(t.common.deleted);
   };
 
   const handleSaveProvider = async () => {
     const check = checkBaseUrl(baseUrl);
     if (!check.ok) {
-      notify('base URL 无效', check.error);
+      notify(t.settings.providerInvalidTitle, check.error);
       return;
     }
     if (!model.trim()) {
-      notify('请填写模型名', '不同 provider 的模型名不同，例如 gpt-4o-mini、deepseek-chat。');
+      notify(t.settings.providerNeedModelTitle, t.settings.providerNeedModelBody);
       return;
     }
     await saveProviderConfig({ baseUrl, model });
     setBaseUrl(normalizeBaseUrl(baseUrl));
     setEditingProvider(false);
-    notify('已保存', check.warning ?? '之后的分析请求会发往这个地址。');
+    notify(t.common.saved, check.warning ?? t.settings.providerSavedBody);
   };
 
   const handleResetProvider = async () => {
@@ -112,7 +117,7 @@ export default function SettingsScreen({ onReassess }: Props) {
     setBaseUrl(DEFAULT_PROVIDER.baseUrl);
     setModel(DEFAULT_PROVIDER.model);
     setEditingProvider(false);
-    notify('已恢复默认', `${DEFAULT_PROVIDER.baseUrl} · ${DEFAULT_PROVIDER.model}`);
+    notify(t.settings.providerResetDone, `${DEFAULT_PROVIDER.baseUrl} · ${DEFAULT_PROVIDER.model}`);
   };
 
   const handleImport = async () => {
@@ -128,15 +133,15 @@ export default function SettingsScreen({ onReassess }: Props) {
 
       const result = validateImport(raw);
       if (!result.ok) {
-        notify('无法导入', result.error);
+        notify(t.settings.importRejected, result.error);
         return;
       }
 
       const { self_portraits, fact_logs } = result.data;
       const ok = await confirmDestructive(
-        '导入数据',
-        `即将导入 ${self_portraits.length} 个自我画像版本和 ${fact_logs.length} 条事实记录。\n\n这会替换掉当前设备上的全部数据，且不可撤销。建议先导出一份当前数据作为备份。`,
-        '替换并导入'
+        t.settings.importTitle,
+        t.settings.importBody(self_portraits.length, fact_logs.length),
+        t.settings.importConfirm
       );
       if (!ok) return;
 
@@ -145,9 +150,9 @@ export default function SettingsScreen({ onReassess }: Props) {
       await setOnboardingDone(counts.portraits > 0);
       setFactCount(counts.facts);
       setPortraits(await getAllSelfPortraits());
-      notify('导入完成', `${counts.facts} 条事实、${counts.portraits} 个画像版本、${counts.analyses} 份历史分析。`);
+      notify(t.settings.importDone, t.settings.importDoneBody(counts.facts, counts.portraits, counts.analyses));
     } catch (err) {
-      notify('导入失败', String(err));
+      notify(t.settings.importFailed, String(err));
     } finally {
       setImporting(false);
     }
@@ -155,9 +160,9 @@ export default function SettingsScreen({ onReassess }: Props) {
 
   const handleSeedDemo = async () => {
     const ok = await confirmDestructive(
-      '载入演示数据',
-      '这会先清空当前所有数据，再写入 30 天的模拟记录，并把档位设为 Plus。仅用于预览界面效果。确定继续？',
-      '清空并载入'
+      t.settings.devSeedTitle,
+      t.settings.devSeedBody,
+      t.settings.devSeedConfirm
     );
     if (!ok) return;
     setSeeding(true);
@@ -167,9 +172,9 @@ export default function SettingsScreen({ onReassess }: Props) {
       setFactCount(r.facts);
       setPortraits(await getAllSelfPortraits());
       await setTier('plus');
-      notify('已载入', `${r.facts} 天演示记录（${r.from} ~ ${r.to}），档位已设为 Plus。`);
+      notify(t.settings.devSeedDone, t.settings.devSeedDoneBody(r.facts, r.from, r.to));
     } catch (err) {
-      notify('载入失败', String(err));
+      notify(t.settings.devSeedFailed, String(err));
     } finally {
       setSeeding(false);
     }
@@ -185,13 +190,13 @@ export default function SettingsScreen({ onReassess }: Props) {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(file.uri, {
           mimeType: 'application/json',
-          dialogTitle: '导出叙事数据',
+          dialogTitle: t.settings.exportDialogTitle,
         });
       } else {
-        notify('导出成功', `文件已保存到：${file.uri}`);
+        notify(t.settings.exportOkTitle, t.settings.exportOkBody(file.uri));
       }
     } catch (err) {
-      notify('导出失败', '请重试');
+      notify(t.settings.exportFailed, t.common.retry);
     } finally {
       setExporting(false);
     }
@@ -199,9 +204,9 @@ export default function SettingsScreen({ onReassess }: Props) {
 
   const handleDeleteAll = async () => {
     const ok = await confirmDestructive(
-      '删除所有数据',
-      '此操作不可撤销。所有自我画像、事实记录和分析结果将被永久删除，App 会回到初始自我画像流程。确定继续？',
-      '永久删除'
+      t.settings.deleteAllTitle,
+      t.settings.deleteAllBody,
+      t.settings.deleteAllConfirm
     );
     if (!ok) return;
     try {
@@ -210,31 +215,31 @@ export default function SettingsScreen({ onReassess }: Props) {
       // 自我画像已被删除，必须同时清掉 onboarding 标记，
       // 否则 App 会停在主界面且再也无法重建画像。
       await setOnboardingDone(false);
-      notify('已删除', '所有本地数据已被清除。');
+      notify(t.common.deleted, t.settings.deleteAllDone);
     } catch (err) {
-      notify('删除失败', '请重试');
+      notify(t.settings.deleteFailed, t.common.retry);
     }
   };
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>设置</Text>
+        <Text style={styles.title}>{t.settings.title}</Text>
 
         {/* API Key Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>AI API Key</Text>
+          <Text style={styles.sectionTitle}>{t.settings.keyTitle}</Text>
           <Text style={styles.sectionDesc}>
-            你提供的 Key 直接保存在设备安全存储中，不会上传到任何服务器。
+            {t.settings.keyDesc}
           </Text>
           {apiKey ? (
             <View style={styles.keyCard}>
-              <Text style={styles.keyLabel}>已设置 Key</Text>
+              <Text style={styles.keyLabel}>{t.settings.keySet}</Text>
               <Text style={styles.keyPreview}>
                 {apiKey.slice(0, 8)}...{apiKey.slice(-4)}
               </Text>
               <TouchableOpacity style={styles.dangerBtnSmall} onPress={handleRemoveKey}>
-                <Text style={styles.dangerBtnText}>删除 Key</Text>
+                <Text style={styles.dangerBtnText}>{t.settings.keyRemove}</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -243,7 +248,7 @@ export default function SettingsScreen({ onReassess }: Props) {
                 <View>
                   <TextInput
                     style={styles.keyInput}
-                    placeholder="sk-..."
+                    placeholder={t.settings.keyPlaceholder}
                     placeholderTextColor="#bbb"
                     value={keyInput}
                     onChangeText={setKeyInput}
@@ -258,16 +263,16 @@ export default function SettingsScreen({ onReassess }: Props) {
                         setKeyInput('');
                       }}
                     >
-                      <Text style={styles.cancelBtnTextSmall}>取消</Text>
+                      <Text style={styles.cancelBtnTextSmall}>{t.common.cancel}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.saveBtnSmall} onPress={handleSaveKey}>
-                      <Text style={styles.saveBtnTextSmall}>保存</Text>
+                      <Text style={styles.saveBtnTextSmall}>{t.common.save}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
               ) : (
                 <TouchableOpacity style={styles.addKeyBtn} onPress={() => setShowKeyInput(true)}>
-                  <Text style={styles.addKeyBtnText}>+ 添加 API Key</Text>
+                  <Text style={styles.addKeyBtnText}>{t.settings.keyAdd}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -276,14 +281,14 @@ export default function SettingsScreen({ onReassess }: Props) {
 
         {/* Provider Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>AI Provider</Text>
+          <Text style={styles.sectionTitle}>{t.settings.providerTitle}</Text>
           <Text style={styles.sectionDesc}>
-            任何兼容 OpenAI 接口格式的服务都可以用，包括跑在本机的模型。
+            {t.settings.providerDesc}
           </Text>
 
           {editingProvider ? (
             <View>
-              <Text style={styles.fieldLabel}>Base URL</Text>
+              <Text style={styles.fieldLabel}>{t.settings.baseUrlLabel}</Text>
               <TextInput
                 style={styles.keyInput}
                 placeholder={DEFAULT_PROVIDER.baseUrl}
@@ -295,10 +300,10 @@ export default function SettingsScreen({ onReassess }: Props) {
                 keyboardType="url"
               />
               <Text style={styles.fieldHint}>
-                填到 /v1 为止，不要带 /chat/completions
+                {t.settings.baseUrlHint}
               </Text>
 
-              <Text style={styles.fieldLabel}>模型</Text>
+              <Text style={styles.fieldLabel}>{t.settings.modelLabel}</Text>
               <TextInput
                 style={styles.keyInput}
                 placeholder={DEFAULT_PROVIDER.model}
@@ -320,28 +325,28 @@ export default function SettingsScreen({ onReassess }: Props) {
                     });
                   }}
                 >
-                  <Text style={styles.cancelBtnTextSmall}>取消</Text>
+                  <Text style={styles.cancelBtnTextSmall}>{t.common.cancel}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.saveBtnSmall} onPress={handleSaveProvider}>
-                  <Text style={styles.saveBtnTextSmall}>保存</Text>
+                  <Text style={styles.saveBtnTextSmall}>{t.common.save}</Text>
                 </TouchableOpacity>
               </View>
 
               <TouchableOpacity style={styles.resetBtn} onPress={handleResetProvider}>
-                <Text style={styles.resetBtnText}>恢复默认（OpenAI）</Text>
+                <Text style={styles.resetBtnText}>{t.settings.providerReset}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.keyCard}>
-              <Text style={styles.keyLabel}>Base URL</Text>
+              <Text style={styles.keyLabel}>{t.settings.baseUrlLabel}</Text>
               <Text style={styles.providerValue}>{baseUrl}</Text>
-              <Text style={[styles.keyLabel, styles.providerLabelGap]}>模型</Text>
+              <Text style={[styles.keyLabel, styles.providerLabelGap]}>{t.settings.modelLabel}</Text>
               <Text style={styles.providerValue}>{model}</Text>
               <TouchableOpacity
                 style={styles.actionBtnSmall}
                 onPress={() => setEditingProvider(true)}
               >
-                <Text style={styles.actionBtnText}>修改</Text>
+                <Text style={styles.actionBtnText}>{t.common.modify}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -349,14 +354,14 @@ export default function SettingsScreen({ onReassess }: Props) {
 
         {/* Self Portrait Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>自我画像</Text>
+          <Text style={styles.sectionTitle}>{t.settings.portraitTitle}</Text>
           <Text style={styles.sectionDesc}>
             {portraits.length > 1
-              ? `已保存 ${portraits.length} 个版本。每次重评都会新增一版，旧版本全部保留。`
-              : '你对自己的看法会变。定期重评，才能看出叙事本身的变化。'}
+              ? t.settings.portraitDescVersions(portraits.length)
+              : t.settings.portraitDescEmpty}
           </Text>
           <TouchableOpacity style={styles.actionBtn} onPress={onReassess}>
-            <Text style={styles.actionBtnText}>重新评价自我画像</Text>
+            <Text style={styles.actionBtnText}>{t.settings.portraitReassess}</Text>
           </TouchableOpacity>
 
           {portraits.length > 0 && (
@@ -365,11 +370,11 @@ export default function SettingsScreen({ onReassess }: Props) {
                 <View key={p.id} style={styles.portraitRow}>
                   <Text style={styles.portraitDate}>
                     {p.created_at.split(' ')[0]}
-                    {i === 0 ? '（最新）' : ''}
+                    {i === 0 ? t.settings.portraitLatest : ''}
                   </Text>
                   <Text style={styles.portraitScores}>
-                    自律 {p.discipline_score} · 投入 {p.engagement_score} · 拖延{' '}
-                    {p.procrastination_score} · 坚持 {p.persistence_score}
+                    {t.settings.portraitScores(p.discipline_score, p.engagement_score,
+                      p.procrastination_score, p.persistence_score)}
                   </Text>
                 </View>
               ))}
@@ -379,20 +384,26 @@ export default function SettingsScreen({ onReassess }: Props) {
 
         {/* Tier Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>分析范围</Text>
-          <Text style={styles.sectionDesc}>解锁更长时间范围的反馈。</Text>
+          <Text style={styles.sectionTitle}>{t.settings.tierTitle}</Text>
+          <Text style={styles.sectionDesc}>{t.settings.tierDesc}</Text>
           <View style={styles.tierRow}>
-            {TIERS.map((t) => (
+            {TIERS.map((tierOption) => (
               <TouchableOpacity
-                key={t.key}
-                style={[styles.tierCard, tier === t.key && styles.tierCardSelected]}
-                onPress={() => setTier(t.key)}
+                key={tierOption.key}
+                style={[styles.tierCard, tier === tierOption.key && styles.tierCardSelected]}
+                onPress={() => setTier(tierOption.key)}
               >
-                <Text style={[styles.tierLabel, tier === t.key && styles.tierLabelSelected]}>
-                  {t.label}
+                <Text
+                  style={[styles.tierLabel, tier === tierOption.key && styles.tierLabelSelected]}
+                >
+                  {tierOption.label}
                 </Text>
-                <Text style={[styles.tierDesc, tier === t.key && styles.tierDescSelected]}>
-                  {t.desc}
+                <Text style={[styles.tierDesc, tier === tierOption.key && styles.tierDescSelected]}>
+                  {tierOption.key === 'free'
+                    ? t.settings.tierFree(TIER_LIMITS.free)
+                    : tierOption.key === 'plus'
+                      ? t.settings.tierPlus
+                      : t.settings.tierPro}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -401,9 +412,9 @@ export default function SettingsScreen({ onReassess }: Props) {
 
         {/* Data Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>数据管理</Text>
+          <Text style={styles.sectionTitle}>{t.settings.dataTitle}</Text>
           <Text style={styles.sectionDesc}>
-            当前存储了 {factCount} 条事实记录。所有数据仅保存在本机。
+            {t.settings.dataDesc(factCount)}
           </Text>
           <TouchableOpacity
             style={styles.actionBtn}
@@ -411,25 +422,25 @@ export default function SettingsScreen({ onReassess }: Props) {
             disabled={exporting}
           >
             <Text style={styles.actionBtnText}>
-              {exporting ? '导出中...' : '导出所有数据 (JSON)'}
+              {exporting ? t.settings.exporting : t.settings.export}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn} onPress={handleImport} disabled={importing}>
             <Text style={styles.actionBtnText}>
-              {importing ? '导入中...' : '导入数据 (JSON)'}
+              {importing ? t.settings.importing : t.settings.import}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.dangerBtn} onPress={handleDeleteAll}>
-            <Text style={styles.dangerBtnTextLarge}>删除所有本地数据</Text>
+            <Text style={styles.dangerBtnTextLarge}>{t.settings.deleteAll}</Text>
           </TouchableOpacity>
         </View>
 
         {/* 仅开发模式可见 —— 生产构建里整块不存在 */}
         {__DEV__ && (
           <View style={[styles.section, styles.devSection]}>
-            <Text style={styles.sectionTitle}>开发工具</Text>
+            <Text style={styles.sectionTitle}>{t.settings.devTitle}</Text>
             <Text style={styles.sectionDesc}>
-              仅在开发模式下显示，不会出现在正式版本中。
+              {t.settings.devDesc}
             </Text>
             <TouchableOpacity
               style={styles.actionBtn}
@@ -437,25 +448,46 @@ export default function SettingsScreen({ onReassess }: Props) {
               disabled={seeding}
             >
               <Text style={styles.actionBtnText}>
-                {seeding ? '载入中...' : '载入 30 天演示数据'}
+                {seeding ? t.settings.devSeeding : t.settings.devSeed}
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Privacy Section */}
+        {/* Language Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>隐私承诺</Text>
-          <View style={styles.privacyCard}>
-            <Text style={styles.privacyItem}>不拥有你的数据</Text>
-            <Text style={styles.privacyItem}>不读取其他 App</Text>
-            <Text style={styles.privacyItem}>不截屏</Text>
-            <Text style={styles.privacyItem}>不建立服务器保存你的隐私</Text>
-            <Text style={styles.privacyItem}>你提交什么，App 才分析什么</Text>
+          <Text style={styles.sectionTitle}>{t.settings.languageTitle}</Text>
+          <Text style={styles.sectionDesc}>{t.settings.languageDesc}</Text>
+          <View style={styles.tierRow}>
+            {(['system', ...SUPPORTED_LOCALES] as LocalePreference[]).map((pref) => (
+              <TouchableOpacity
+                key={pref}
+                style={[styles.tierCard, localePreference === pref && styles.tierCardSelected]}
+                onPress={() => setLocalePreference(pref)}
+              >
+                <Text
+                  style={[styles.tierLabel, localePreference === pref && styles.tierLabelSelected]}
+                >
+                  {pref === 'system' ? t.settings.languageSystem : messagesFor(pref).locale.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
-        <Text style={styles.version}>Narrative Tracker v1.0.0 · Local-first · BYOK</Text>
+        {/* Privacy Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t.settings.privacyTitle}</Text>
+          <View style={styles.privacyCard}>
+            {t.settings.privacyLines.map((line) => (
+              <Text key={line} style={styles.privacyItem}>
+                {line}
+              </Text>
+            ))}
+          </View>
+        </View>
+
+        <Text style={styles.version}>{t.settings.footer}</Text>
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useT } from '../i18n/useT';
 
 interface Props {
   value: number;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function RatingScale({ value, onChange, label }: Props) {
+  const t = useT();
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -26,8 +28,8 @@ export default function RatingScale({ value, onChange, label }: Props) {
         ))}
       </View>
       <View style={styles.labelsRow}>
-        <Text style={styles.endLabel}>1 非常不符合</Text>
-        <Text style={styles.endLabel}>10 非常符合</Text>
+        <Text style={styles.endLabel}>{t.scale.low}</Text>
+        <Text style={styles.endLabel}>{t.scale.high}</Text>
       </View>
     </View>
   );

@@ -1,10 +1,14 @@
 import { secureGet, secureSet, secureDelete } from './storage';
 import type { AIAnalysisOutput, Tier, SelfPortrait, FactLog } from '../types';
 import { getProviderConfig } from './provider';
+import type { LocalePreference } from '../i18n/types';
+import { t } from '../i18n';
+import { tagLabel } from '../constants/questions';
 
 const API_KEY_STORE_KEY = 'narrative_tracker_api_key';
 const ONBOARDING_STORE_KEY = 'narrative_tracker_onboarding_done';
 const TIER_STORE_KEY = 'narrative_tracker_tier';
+const LOCALE_STORE_KEY = 'narrative_tracker_locale';
 
 // ── API Key Management ──
 
@@ -51,6 +55,17 @@ export async function getTier(): Promise<Tier> {
   return value === 'plus' || value === 'pro' ? value : 'free';
 }
 
+// ── Locale ──
+
+export async function saveLocalePreference(pref: LocalePreference): Promise<void> {
+  await secureSet(LOCALE_STORE_KEY, pref);
+}
+
+export async function getLocalePreference(): Promise<LocalePreference> {
+  const value = await secureGet(LOCALE_STORE_KEY);
+  return value === 'zh' || value === 'en' ? value : 'system';
+}
+
 // ── AI Analysis ──
 
 const SYSTEM_PROMPT = `你是一个冷静、温和、有证据意识的自我认知教练。
@@ -93,10 +108,17 @@ const scoreLine = (p: SelfPortrait) =>
   `自律 ${p.discipline_score}/10、投入 ${p.engagement_score}/10、` +
   `拖延 ${p.procrastination_score}/10（越高越拖延）、坚持 ${p.persistence_score}/10`;
 
+/**
+ * 取出标签的**显示名**而不是库里的 id。
+ *
+ * 库里存的是 'study' 这类稳定 id（切换语言时统计不会分裂），
+ * 但 prompt 是给模型读的，裸 id 会让它难以判断主题；
+ * tagLabel 同时兼容旧数据里存的中文名。
+ */
 function parseTags(raw: string): string[] {
   try {
     const v = JSON.parse(raw);
-    return Array.isArray(v) ? v.filter((t) => typeof t === 'string') : [];
+    return Array.isArray(v) ? v.filter((x) => typeof x === 'string').map((x) => tagLabel(x)) : [];
   } catch {
     return [];
   }
@@ -181,14 +203,16 @@ ${facts
 export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisOutput> {
   const apiKey = await getApiKey();
   if (!apiKey) {
-    throw new Error('API Key 未设置。请在设置中填写你的 AI API Key。');
+    throw new Error(t().ai.noKey);
   }
 
   const userPrompt = buildAnalysisPrompt(input);
   const { baseUrl, model } = await getProviderConfig();
 
   const messages = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    // 报告是给用户读的，必须用界面语言写；prompt 骨架保持中文即可，
+    // 模型理解中文指令没有问题，但输出语言必须显式指定。
+    { role: 'system', content: `${SYSTEM_PROMPT}\n\n${t().locale.aiInstruction}` },
     { role: 'user', content: userPrompt },
   ];
 
@@ -216,16 +240,14 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(
-      `AI 请求失败 (${response.status})：${errorText.slice(0, 300)}\n\n当前 provider：${baseUrl}，模型：${model}`
-    );
+    throw new Error(t().ai.requestFailed(response.status, errorText.slice(0, 300), baseUrl, model));
   }
 
   const data = await response.json();
   const content = data.choices?.[0]?.message?.content;
 
   if (!content) {
-    throw new Error(`AI 返回了空内容。当前 provider：${baseUrl}，模型：${model}`);
+    throw new Error(t().ai.emptyResponse(baseUrl, model));
   }
 
   // 未走 json_object 模式时，很多模型会把 JSON 包在 ```json 围栏里
@@ -239,7 +261,7 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
   try {
     parsed = JSON.parse(stripped) as AIAnalysisOutput;
   } catch {
-    throw new Error(`AI 返回的不是合法 JSON。原始内容开头：${stripped.slice(0, 200)}`);
+    throw new Error(t().ai.badJson(stripped.slice(0, 200)));
   }
 
   if (
@@ -249,7 +271,7 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
     !Array.isArray(parsed.matched_beliefs) ||
     !Array.isArray(parsed.gaps)
   ) {
-    throw new Error('AI 返回格式不符合预期');
+    throw new Error(t().ai.badShape);
   }
 
   // 模型可能给出超出 0-100 的分数或非法的置信度，

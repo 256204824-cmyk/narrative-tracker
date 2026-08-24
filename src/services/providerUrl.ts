@@ -1,6 +1,8 @@
 // Provider base URL 的归一化与校验。
 //
-// 刻意不 import 任何东西：这样它可以脱离 expo 原生模块被直接测试。
+// 只依赖 i18n（纯数据，无原生模块），仍可脱离 expo 被直接测试。
+
+import { t } from '../i18n/catalog.ts';
 
 export interface UrlCheck {
   ok: boolean;
@@ -26,17 +28,17 @@ export function normalizeBaseUrl(raw: string): string {
 
 export function checkBaseUrl(raw: string): UrlCheck {
   const url = normalizeBaseUrl(raw);
-  if (!url) return { ok: false, error: 'base URL 不能为空' };
+  if (!url) return { ok: false, error: t().provider.urlEmpty };
 
   let parsed: URL;
   try {
     parsed = new URL(url);
   } catch {
-    return { ok: false, error: '不是合法的 URL，需要以 http:// 或 https:// 开头' };
+    return { ok: false, error: t().provider.urlInvalid };
   }
 
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-    return { ok: false, error: '只支持 http:// 或 https://' };
+    return { ok: false, error: t().provider.urlProtocol };
   }
 
   const host = parsed.hostname;
@@ -51,8 +53,7 @@ export function checkBaseUrl(raw: string): UrlCheck {
   if (parsed.protocol === 'http:' && !isLocal) {
     return {
       ok: true,
-      warning:
-        '这是明文 http 连接，你的 API Key 和事实记录会以明文经过网络。除非是本机服务，否则建议使用 https。',
+      warning: t().provider.urlPlaintextWarning,
     };
   }
 
