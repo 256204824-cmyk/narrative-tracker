@@ -18,6 +18,12 @@ choose to submit — nothing else.
   Right: what the facts say about the story you tell yourself.</em>
 </p>
 
+<p align="center">
+  <sub>Screenshots use the built-in demo data. The report text is an
+  illustrative sample showing the shape and density of a real report — it is
+  not a live model output.</sub>
+</p>
+
 ---
 
 ## Why
