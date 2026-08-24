@@ -24,6 +24,8 @@ export default function DiagnosticsPanel({ error }: Props) {
     [
       `provider: ${error.baseUrl}`,
       `model: ${error.model}`,
+      `finish_reason: ${error.finishReason ?? '-'}`,
+      `length: ${error.raw.length}`,
       '',
       t.diagnostics.fieldsHeader,
       ...error.issues.map(
@@ -51,6 +53,18 @@ export default function DiagnosticsPanel({ error }: Props) {
 
       {open && (
         <View style={styles.body}>
+          <Text style={styles.sectionLabel}>{t.diagnostics.metaHeader}</Text>
+          <Text style={styles.kv}>
+            <Text style={styles.k}>{t.diagnostics.finishReasonLabel}: </Text>
+            {error.finishReason ?? t.diagnostics.finishReasonMissing}
+          </Text>
+          <Text style={[styles.kv, styles.metaGap]}>
+            {t.diagnostics.responseLength(error.raw.length)}
+          </Text>
+          {error.finishReason === 'length' && (
+            <Text style={styles.truncated}>{t.diagnostics.truncatedNote}</Text>
+          )}
+
           <Text style={styles.sectionLabel}>{t.diagnostics.fieldsHeader}</Text>
           {error.issues.map((issue, i) => (
             <View key={`${issue.field}-${i}`} style={styles.issue}>
@@ -136,6 +150,16 @@ const styles = StyleSheet.create({
   tagFatal: { backgroundColor: '#fee2e2', color: '#b91c1c' },
   tagOk: { backgroundColor: '#f1f5f9', color: '#64748b' },
   kv: { fontSize: 12, color: '#444', lineHeight: 18, ...MONO },
+  metaGap: { marginBottom: 4 },
+  truncated: {
+    fontSize: 12,
+    color: '#b45309',
+    lineHeight: 18,
+    backgroundColor: '#fffbeb',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 4,
+  },
   k: { color: '#999' },
   rawBox: {
     maxHeight: 220,

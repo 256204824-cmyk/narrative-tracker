@@ -18,7 +18,9 @@ export class AnalysisFormatError extends Error {
     readonly issues: FieldIssue[],
     readonly raw: string,
     readonly baseUrl: string,
-    readonly model: string
+    readonly model: string,
+    /** OpenAI 兼容接口的 finish_reason，'length' 表示被截断 */
+    readonly finishReason?: string
   ) {
     super(t().ai.badShape);
     this.name = 'AnalysisFormatError';
@@ -266,10 +268,30 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
   }
 
   const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
+  const choice = data.choices?.[0];
+  const content: string | undefined = choice?.message?.content;
+  const finishReason: string | undefined = choice?.finish_reason;
 
   if (!content) {
-    throw new Error(t().ai.emptyResponse(baseUrl, model));
+    throw new AnalysisFormatError(
+      [{ field: t().ai.wholeResponse, expected: 'string', actual: 'empty', fatal: true }],
+      '',
+      baseUrl,
+      model,
+      finishReason
+    );
+  }
+
+  // 响应被截断时 JSON 一定不完整，与其让用户看到「不是合法的 JSON」，
+  // 不如直接说清是截断，并给出可操作的建议。
+  if (finishReason === 'length') {
+    throw new AnalysisFormatError(
+      [{ field: 'finish_reason', expected: 'stop', actual: 'length', fatal: true }],
+      content,
+      baseUrl,
+      model,
+      finishReason
+    );
   }
 
   // 未走 json_object 模式时，很多模型会把 JSON 包在 ```json 围栏里
@@ -287,7 +309,8 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
       [{ field: t().ai.wholeResponse, expected: 'JSON', actual: t().ai.notJsonActual, fatal: true }],
       content,
       baseUrl,
-      model
+      model,
+      finishReason
     );
   }
 
@@ -295,7 +318,7 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
     return inspectAnalysis(parsed).output;
   } catch (issues) {
     if (Array.isArray(issues)) {
-      throw new AnalysisFormatError(issues as FieldIssue[], content, baseUrl, model);
+      throw new AnalysisFormatError(issues as FieldIssue[], content, baseUrl, model, finishReason);
     }
     throw issues;
   }
