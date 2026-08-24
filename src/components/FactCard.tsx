@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import type { FactLog } from '../types';
 import { useT } from '../i18n/useT';
 import { tagLabel } from '../constants/questions';
 
 interface Props {
   fact: FactLog;
+  /** 传入后整张卡片可点，用于打开编辑 */
+  onPress?: () => void;
 }
 
-export default function FactCard({ fact }: Props) {
+export default function FactCard({ fact, onPress }: Props) {
   const t = useT();
   const tags: string[] = (() => {
     try {
@@ -18,8 +20,10 @@ export default function FactCard({ fact }: Props) {
     }
   })();
 
+  const Wrapper: React.ComponentType<any> = onPress ? TouchableOpacity : View;
+
   return (
-    <View style={styles.card}>
+    <Wrapper style={styles.card} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.header}>
         <Text style={styles.date}>{fact.date}</Text>
         {tags.length > 0 && (
@@ -65,7 +69,7 @@ export default function FactCard({ fact }: Props) {
           <Text style={styles.sectionText}>{fact.representative_fact}</Text>
         </View>
       ) : null}
-    </View>
+    </Wrapper>
   );
 }
 

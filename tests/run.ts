@@ -515,6 +515,25 @@ group('Provider 预设', () => {
   }
 });
 
+// ────────────────────────────────────────────────
+group('编辑 / 删除 / 崩溃兜底的文案', () => {
+  for (const loc of SUPPORTED_LOCALES) {
+    const m = messagesFor(loc);
+    ok(`${loc} 有编辑入口文案`, m.home.edit.length > 0);
+    ok(`${loc} 编辑标题带日期`, m.home.editTitle('2026-08-24').includes('2026-08-24'));
+    ok(`${loc} 有删除记录文案`, m.home.deleteEntry.length > 0 && m.home.deleteEntryBody.length > 0);
+    ok(`${loc} 有删除报告文案`, m.home.deleteReport.length > 0 && m.home.deleteReportBody.length > 0);
+    ok(`${loc} 今日已记提示带条数`, m.home.alreadyLoggedToday(3).includes('3'));
+    // 崩溃页必须明说数据没丢——这个 App 的数据全在本机，
+    // 用户看到白屏的第一反应是「是不是全没了」
+    ok(`${loc} 有崩溃页标题`, m.crash.title.length > 0);
+    ok(`${loc} 有崩溃页说明`, m.crash.body.length > 0);
+    ok(`${loc} 有重试按钮`, m.crash.retry.length > 0);
+    // 删除记录与删除报告必须是不同文案，否则用户分不清删的是哪个
+    ok(`${loc} 删记录与删报告文案不同`, m.home.deleteEntry !== m.home.deleteReport);
+  }
+});
+
 console.log(`\n${'═'.repeat(40)}`);
 console.log(`${passed} 通过 · ${failed} 失败`);
 if (failed > 0) process.exit(1);

@@ -12,12 +12,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import GapIndicator from '../components/GapIndicator';
 import { requestAnalysis, AnalysisFormatError } from '../services';
 import DiagnosticsPanel from '../components/DiagnosticsPanel';
-import { getAllSelfPortraits, getFactLogsBetween, saveAnalysisResult, getAllAnalyses } from '../database';
+import {
+  getAllSelfPortraits,
+  getFactLogsBetween,
+  saveAnalysisResult,
+  getAllAnalyses,
+  deleteAnalysisResult,
+} from '../database';
 import { today, daysAgo, countDistinctDays } from '../utils/date';
 import { TIER_LIMITS, MIN_DAYS_FOR_ANALYSIS } from '../constants/questions';
 import type { AIAnalysisOutput, AnalysisResult, FactLog, SelfPortrait } from '../types';
 import { useAppState } from '../store/AppContext';
 import { useT } from '../i18n/useT';
+import { confirmDestructive } from '../utils/dialog';
 
 export default function FeedbackScreen() {
   const { tier } = useAppState();
@@ -53,6 +60,18 @@ export default function FeedbackScreen() {
   );
 
   // 历史报告在库里是 JSON 字符串，点开时还原成渲染用的结构。
+  const removeReport = async (a: AnalysisResult) => {
+    const ok = await confirmDestructive(
+      t.home.deleteReport,
+      t.home.deleteReportBody,
+      t.common.delete
+    );
+    if (!ok) return;
+    await deleteAnalysisResult(a.id);
+    if (result?.summary === a.summary) setResult(null);
+    await loadPrevious();
+  };
+
   const openSaved = (a: AnalysisResult) => {
     const parseList = <T,>(raw: string): T[] => {
       try {
@@ -256,7 +275,14 @@ export default function FeedbackScreen() {
                 <Text style={styles.historySummary} numberOfLines={2}>
                   {a.summary}
                 </Text>
-                <Text style={styles.historyScore}>{t.feedback.historyScore(a.alignment_score)}</Text>
+                <View style={styles.historyFooter}>
+                  <Text style={styles.historyScore}>
+                    {t.feedback.historyScore(a.alignment_score)}
+                  </Text>
+                  <Text style={styles.historyDelete} onPress={() => removeReport(a)}>
+                    {t.home.deleteReport}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -366,5 +392,7 @@ const styles = StyleSheet.create({
   },
   historyPeriod: { fontSize: 12, color: '#999', marginBottom: 4 },
   historySummary: { fontSize: 14, color: '#333', lineHeight: 20, marginBottom: 4 },
+  historyFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
+  historyDelete: { fontSize: 12, color: '#ef4444', fontWeight: '600' },
   historyScore: { fontSize: 12, color: '#4f46e5', fontWeight: '600' },
 });

@@ -85,6 +85,16 @@ export const en: Messages = {
     needOneFieldTitle: 'Please fill in at least one field',
     needOneFieldBody: 'Even a single sentence matters.',
     saveFailed: "Couldn't save",
+    edit: 'Edit this entry',
+    editTitle: (date: string) => `Editing ${date}`,
+    deleteEntry: 'Delete this entry',
+    deleteEntryTitle: 'Delete this entry',
+    deleteEntryBody: 'This entry will be permanently deleted. This cannot be undone.',
+    updated: 'Updated',
+    alreadyLoggedToday: (n: number) =>
+      `You already have ${n} ${n === 1 ? 'entry' : 'entries'} today. Add another, or tap a card above to edit one.`,
+    deleteReport: 'Delete this report',
+    deleteReportBody: 'This report will be permanently deleted. Your entries are not affected.',
   },
 
   fact: {
@@ -128,6 +138,13 @@ export const en: Messages = {
       `You have ${have} ${have === 1 ? 'day' : 'days'} recorded in the last ${windowDays} days. ${need} more to go.\n\nPatterns only show across different days — several entries on one day don't count.`,
     loadFailed: "Couldn't read local records. Please try again.",
     genericFailure: 'Analysis failed. Check your API key and network connection.',
+  },
+
+  crash: {
+    title: 'Something broke',
+    body: 'The screen failed to render. Your entries are still on this device — nothing was lost.',
+    retry: 'Try again',
+    detail: 'Error details',
   },
 
   settings: {

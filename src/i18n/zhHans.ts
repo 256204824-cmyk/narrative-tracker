@@ -89,6 +89,16 @@ export const zhHans = {
     needOneFieldTitle: '请至少填写一项',
     needOneFieldBody: '即使是简单的一句话也很重要。',
     saveFailed: '保存失败',
+    edit: '修改这条',
+    editTitle: (date: string) => `修改 ${date} 的记录`,
+    deleteEntry: '删除这条记录',
+    deleteEntryTitle: '删除这条记录',
+    deleteEntryBody: '这条事实将被永久删除，不可撤销。',
+    updated: '已更新',
+    alreadyLoggedToday: (n: number) =>
+      `今天已经记过 ${n} 条。可以再记一条，也可以点上面的卡片修改已有的。`,
+    deleteReport: '删除这份报告',
+    deleteReportBody: '这份分析报告将被永久删除。事实记录不受影响。',
   },
 
   fact: {
@@ -132,6 +142,13 @@ export const zhHans = {
       `最近 ${windowDays} 天里你有 ${have} 天的记录，还需要再记录 ${need} 天。\n\n跨越不同日子的记录才能看出模式，同一天写多条不算。`,
     loadFailed: '读取本地记录失败，请重试。',
     genericFailure: '分析失败，请检查 API Key 和网络连接。',
+  },
+
+  crash: {
+    title: '出了点问题',
+    body: '界面渲染时出错了。你的记录都还在本机，没有丢失。',
+    retry: '重试',
+    detail: '错误详情',
   },
 
   settings: {

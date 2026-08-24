@@ -67,6 +67,16 @@ export const ja: Messages = {
     needOneFieldTitle: '少なくとも一つ入力してください',
     needOneFieldBody: '一言だけでも意味があります。',
     saveFailed: '保存できませんでした',
+    edit: 'この記録を修正',
+    editTitle: (date: string) => `${date} の記録を修正`,
+    deleteEntry: 'この記録を削除',
+    deleteEntryTitle: 'この記録を削除',
+    deleteEntryBody: 'この記録は完全に削除されます。元に戻せません。',
+    updated: '更新しました',
+    alreadyLoggedToday: (n: number) =>
+      `今日はすでに ${n} 件記録しています。追加することも、上のカードをタップして修正することもできます。`,
+    deleteReport: 'このレポートを削除',
+    deleteReportBody: 'このレポートは完全に削除されます。記録には影響しません。',
   },
 
   fact: {
@@ -103,6 +113,13 @@ export const ja: Messages = {
       `直近 ${windowDays} 日のうち ${have} 日分の記録があります。あと ${need} 日必要です。\n\nパターンは日をまたいで初めて見えてきます。同じ日に何件書いても日数には数えません。`,
     loadFailed: 'ローカルの記録を読み込めませんでした。もう一度お試しください。',
     genericFailure: '分析に失敗しました。API キーとネットワーク接続をご確認ください。',
+  },
+
+  crash: {
+    title: '問題が発生しました',
+    body: '画面の描画に失敗しました。記録はこの端末に残っており、失われていません。',
+    retry: '再試行',
+    detail: 'エラーの詳細',
   },
 
   settings: {

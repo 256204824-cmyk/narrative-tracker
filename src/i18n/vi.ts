@@ -67,6 +67,16 @@ export const vi: Messages = {
     needOneFieldTitle: 'Hãy điền ít nhất một mục',
     needOneFieldBody: 'Dù chỉ một câu cũng có ý nghĩa.',
     saveFailed: 'Không lưu được',
+    edit: 'Sửa mục này',
+    editTitle: (date: string) => `Đang sửa ${date}`,
+    deleteEntry: 'Xoá mục này',
+    deleteEntryTitle: 'Xoá mục này',
+    deleteEntryBody: 'Mục này sẽ bị xoá vĩnh viễn và không thể hoàn tác.',
+    updated: 'Đã cập nhật',
+    alreadyLoggedToday: (n: number) =>
+      `Hôm nay bạn đã ghi ${n} mục. Có thể ghi thêm, hoặc bấm vào thẻ phía trên để sửa.`,
+    deleteReport: 'Xoá báo cáo này',
+    deleteReportBody: 'Báo cáo này sẽ bị xoá vĩnh viễn. Các ghi chép không bị ảnh hưởng.',
   },
 
   fact: {
@@ -103,6 +113,13 @@ export const vi: Messages = {
       `Bạn có ${have} ngày được ghi trong ${windowDays} ngày gần nhất. Cần thêm ${need} ngày nữa.\n\nCác mô hình chỉ hiện ra qua nhiều ngày khác nhau — viết nhiều mục trong cùng một ngày không được tính thêm.`,
     loadFailed: 'Không đọc được dữ liệu trên máy. Vui lòng thử lại.',
     genericFailure: 'Phân tích thất bại. Hãy kiểm tra khoá API và kết nối mạng.',
+  },
+
+  crash: {
+    title: 'Đã xảy ra sự cố',
+    body: 'Không dựng được giao diện. Các ghi chép của bạn vẫn nằm trên thiết bị này, không mất gì cả.',
+    retry: 'Thử lại',
+    detail: 'Chi tiết lỗi',
   },
 
   settings: {

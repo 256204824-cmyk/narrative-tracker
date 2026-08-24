@@ -11,6 +11,7 @@ import HomeScreenWrapper from './src/screens/HomeScreen';
 import FeedbackScreen from './src/screens/FeedbackScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ReassessScreen from './src/screens/ReassessScreen';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -100,11 +101,14 @@ function RootNavigator() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AppProvider>
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
-      </AppProvider>
+      {/* 放在 AppProvider 外层：连语言加载都出错时也要有东西兜住 */}
+      <ErrorBoundary>
+        <AppProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </AppProvider>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }

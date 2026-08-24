@@ -67,6 +67,16 @@ export const de: Messages = {
     needOneFieldTitle: 'Bitte fülle mindestens ein Feld aus',
     needOneFieldBody: 'Auch ein einzelner Satz zählt.',
     saveFailed: 'Speichern fehlgeschlagen',
+    edit: 'Diesen Eintrag bearbeiten',
+    editTitle: (date: string) => `${date} bearbeiten`,
+    deleteEntry: 'Diesen Eintrag löschen',
+    deleteEntryTitle: 'Diesen Eintrag löschen',
+    deleteEntryBody: 'Dieser Eintrag wird dauerhaft gelöscht. Das lässt sich nicht rückgängig machen.',
+    updated: 'Aktualisiert',
+    alreadyLoggedToday: (n: number) =>
+      `Du hast heute schon ${n} ${n === 1 ? 'Eintrag' : 'Einträge'}. Füge einen weiteren hinzu oder tippe oben auf eine Karte, um sie zu bearbeiten.`,
+    deleteReport: 'Diesen Bericht löschen',
+    deleteReportBody: 'Dieser Bericht wird dauerhaft gelöscht. Deine Einträge bleiben unberührt.',
   },
 
   fact: {
@@ -103,6 +113,13 @@ export const de: Messages = {
       `Du hast ${have} von ${windowDays} Tagen festgehalten. Es fehlen noch ${need}.\n\nMuster zeigen sich erst über verschiedene Tage hinweg — mehrere Einträge an einem Tag zählen nicht extra.`,
     loadFailed: 'Lokale Einträge konnten nicht gelesen werden. Bitte erneut versuchen.',
     genericFailure: 'Analyse fehlgeschlagen. Prüfe deinen API-Schlüssel und die Netzwerkverbindung.',
+  },
+
+  crash: {
+    title: 'Etwas ist schiefgelaufen',
+    body: 'Die Ansicht konnte nicht dargestellt werden. Deine Einträge liegen weiterhin auf diesem Gerät — es ging nichts verloren.',
+    retry: 'Erneut versuchen',
+    detail: 'Fehlerdetails',
   },
 
   settings: {

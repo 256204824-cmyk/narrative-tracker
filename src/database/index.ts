@@ -120,6 +120,39 @@ export async function saveFactLog(fact: Omit<FactLog, 'id' | 'created_at'>): Pro
   return result.lastInsertRowId;
 }
 
+/**
+ * 修改一条已提交的事实。
+ *
+ * 写错字、手滑提交两遍——不能改的话这条记录会永远留着，还会进 AI prompt。
+ * 对一个要求用户「诚实记录」的产品，改不了会让人不敢随便写。
+ */
+export async function updateFactLog(
+  id: number,
+  fact: Omit<FactLog, 'id' | 'created_at' | 'date'>
+): Promise<void> {
+  const database = await getDatabase();
+  await database.runAsync(
+    `UPDATE fact_logs SET completed_text = ?, uncompleted_text = ?, progress_evidence = ?,
+     avoidance_text = ?, representative_fact = ?, one_line_fact = ?, category_tags = ?
+     WHERE id = ?`,
+    [
+      fact.completed_text,
+      fact.uncompleted_text,
+      fact.progress_evidence,
+      fact.avoidance_text,
+      fact.representative_fact,
+      fact.one_line_fact,
+      fact.category_tags,
+      id,
+    ]
+  );
+}
+
+export async function deleteFactLog(id: number): Promise<void> {
+  const database = await getDatabase();
+  await database.runAsync('DELETE FROM fact_logs WHERE id = ?', [id]);
+}
+
 export async function getFactLogsSince(since: string): Promise<FactLog[]> {
   const database = await getDatabase();
   return database.getAllAsync<FactLog>(
@@ -141,6 +174,15 @@ export async function getAllFactLogs(): Promise<FactLog[]> {
   return database.getAllAsync<FactLog>(
     'SELECT * FROM fact_logs ORDER BY date DESC'
   );
+}
+
+export async function countFactsOnDate(date: string): Promise<number> {
+  const database = await getDatabase();
+  const row = await database.getFirstAsync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM fact_logs WHERE date = ?',
+    [date]
+  );
+  return row?.count ?? 0;
 }
 
 export async function getFactLogCount(): Promise<number> {
@@ -179,6 +221,11 @@ export async function getLatestAnalysis(): Promise<AnalysisResult | null> {
     'SELECT * FROM analysis_results ORDER BY created_at DESC LIMIT 1'
   );
   return row || null;
+}
+
+export async function deleteAnalysisResult(id: number): Promise<void> {
+  const database = await getDatabase();
+  await database.runAsync('DELETE FROM analysis_results WHERE id = ?', [id]);
 }
 
 export async function getAllAnalyses(): Promise<AnalysisResult[]> {

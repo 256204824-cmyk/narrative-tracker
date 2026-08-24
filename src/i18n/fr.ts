@@ -67,6 +67,16 @@ export const fr: Messages = {
     needOneFieldTitle: 'Remplissez au moins un champ',
     needOneFieldBody: 'Même une seule phrase compte.',
     saveFailed: "Échec de l'enregistrement",
+    edit: 'Modifier cette note',
+    editTitle: (date: string) => `Modification du ${date}`,
+    deleteEntry: 'Supprimer cette note',
+    deleteEntryTitle: 'Supprimer cette note',
+    deleteEntryBody: 'Cette note sera définitivement supprimée. Action irréversible.',
+    updated: 'Modifié',
+    alreadyLoggedToday: (n: number) =>
+      `Vous avez déjà ${n} note${n === 1 ? '' : 's'} aujourd'hui. Ajoutez-en une autre, ou touchez une carte ci-dessus pour la modifier.`,
+    deleteReport: 'Supprimer ce rapport',
+    deleteReportBody: 'Ce rapport sera définitivement supprimé. Vos notes ne sont pas affectées.',
   },
 
   fact: {
@@ -103,6 +113,13 @@ export const fr: Messages = {
       `Vous avez ${have} ${have === 1 ? 'jour' : 'jours'} noté${have === 1 ? '' : 's'} sur les ${windowDays} derniers jours. Il en manque ${need}.\n\nLes tendances n’apparaissent que sur des jours différents : plusieurs entrées le même jour ne comptent pas.`,
     loadFailed: 'Impossible de lire les données locales. Veuillez réessayer.',
     genericFailure: "L'analyse a échoué. Vérifiez votre clé d'API et votre connexion.",
+  },
+
+  crash: {
+    title: 'Quelque chose a cassé',
+    body: "L'affichage a échoué. Vos notes sont toujours sur cet appareil : rien n'a été perdu.",
+    retry: 'Réessayer',
+    detail: "Détails de l'erreur",
   },
 
   settings: {

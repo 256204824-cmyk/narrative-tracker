@@ -67,6 +67,16 @@ export const ko: Messages = {
     needOneFieldTitle: '최소 한 가지는 입력해 주세요',
     needOneFieldBody: '한 문장이라도 의미가 있습니다.',
     saveFailed: '저장하지 못했습니다',
+    edit: '이 기록 수정',
+    editTitle: (date: string) => `${date} 기록 수정`,
+    deleteEntry: '이 기록 삭제',
+    deleteEntryTitle: '이 기록 삭제',
+    deleteEntryBody: '이 기록은 영구히 삭제됩니다. 되돌릴 수 없습니다.',
+    updated: '수정했습니다',
+    alreadyLoggedToday: (n: number) =>
+      `오늘 이미 ${n}개를 기록했습니다. 더 추가하거나, 위 카드를 눌러 수정할 수 있습니다.`,
+    deleteReport: '이 리포트 삭제',
+    deleteReportBody: '이 리포트는 영구히 삭제됩니다. 기록에는 영향이 없습니다.',
   },
 
   fact: {
@@ -103,6 +113,13 @@ export const ko: Messages = {
       `최근 ${windowDays}일 중 ${have}일치 기록이 있습니다. ${need}일이 더 필요합니다.\n\n패턴은 서로 다른 날에 걸쳐야 드러납니다. 같은 날 여러 건을 써도 날짜 수로는 세지 않습니다.`,
     loadFailed: '로컬 기록을 불러오지 못했습니다. 다시 시도해 주세요.',
     genericFailure: '분석에 실패했습니다. API 키와 네트워크 연결을 확인해 주세요.',
+  },
+
+  crash: {
+    title: '문제가 발생했습니다',
+    body: '화면을 그리는 중 오류가 났습니다. 기록은 이 기기에 그대로 있으며 사라지지 않았습니다.',
+    retry: '다시 시도',
+    detail: '오류 상세',
   },
 
   settings: {

@@ -67,6 +67,16 @@ export const es: Messages = {
     needOneFieldTitle: 'Completa al menos un campo',
     needOneFieldBody: 'Incluso una sola frase cuenta.',
     saveFailed: 'No se pudo guardar',
+    edit: 'Editar esta entrada',
+    editTitle: (date: string) => `Editando ${date}`,
+    deleteEntry: 'Eliminar esta entrada',
+    deleteEntryTitle: 'Eliminar esta entrada',
+    deleteEntryBody: 'Esta entrada se eliminará permanentemente. No se puede deshacer.',
+    updated: 'Actualizado',
+    alreadyLoggedToday: (n: number) =>
+      `Hoy ya tienes ${n} ${n === 1 ? 'entrada' : 'entradas'}. Añade otra o toca una tarjeta arriba para editarla.`,
+    deleteReport: 'Eliminar este informe',
+    deleteReportBody: 'Este informe se eliminará permanentemente. Tus entradas no se ven afectadas.',
   },
 
   fact: {
@@ -103,6 +113,13 @@ export const es: Messages = {
       `Tienes ${have} ${have === 1 ? 'día' : 'días'} registrados en los últimos ${windowDays} días. Faltan ${need}.\n\nLos patrones solo se ven a lo largo de días distintos; varias entradas en un mismo día no cuentan.`,
     loadFailed: 'No se pudieron leer los registros locales. Inténtalo de nuevo.',
     genericFailure: 'Falló el análisis. Revisa tu clave de API y la conexión.',
+  },
+
+  crash: {
+    title: 'Algo se rompió',
+    body: 'La pantalla no se pudo dibujar. Tus registros siguen en este dispositivo: no se ha perdido nada.',
+    retry: 'Reintentar',
+    detail: 'Detalles del error',
   },
 
   settings: {

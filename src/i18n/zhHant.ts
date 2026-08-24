@@ -67,6 +67,16 @@ export const zhHant: Messages = {
     needOneFieldTitle: '請至少填寫一項',
     needOneFieldBody: '即使是簡單的一句話也很重要。',
     saveFailed: '儲存失敗',
+    edit: '修改這條',
+    editTitle: (date: string) => `修改 ${date} 的記錄`,
+    deleteEntry: '刪除這條記錄',
+    deleteEntryTitle: '刪除這條記錄',
+    deleteEntryBody: '這條事實將被永久刪除，不可復原。',
+    updated: '已更新',
+    alreadyLoggedToday: (n: number) =>
+      `今天已經記過 ${n} 條。可以再記一條，也可以點上面的卡片修改既有的。`,
+    deleteReport: '刪除這份報告',
+    deleteReportBody: '這份分析報告將被永久刪除。事實記錄不受影響。',
   },
 
   fact: {
@@ -103,6 +113,13 @@ export const zhHant: Messages = {
       `最近 ${windowDays} 天裡你有 ${have} 天的記錄，還需要再記錄 ${need} 天。\n\n跨越不同日子的記錄才能看出模式，同一天寫多條不算。`,
     loadFailed: '讀取本機記錄失敗，請重試。',
     genericFailure: '分析失敗，請檢查 API Key 和網路連線。',
+  },
+
+  crash: {
+    title: '出了點問題',
+    body: '介面繪製時出錯了。你的記錄都還在本機，沒有遺失。',
+    retry: '重試',
+    detail: '錯誤詳情',
   },
 
   settings: {
