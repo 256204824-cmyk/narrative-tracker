@@ -64,7 +64,10 @@ src/
                             Feedback, Settings
   components/               RatingScale, FactCard, GapIndicator,
                             DiagnosticsPanel, ErrorBoundary
-  dev/                      30-day demo data, dev-only, behind __DEV__
+  dev/                      30-day demo data. Dev-only: metro.config.js swaps
+                            seed.ts for a stub in production builds, because
+                            Metro has no code splitting — __DEV__ and dynamic
+                            import() both leave it in the bundle.
 ```
 
 ## Conventions worth knowing

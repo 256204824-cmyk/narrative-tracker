@@ -55,7 +55,9 @@ src/
                             Feedback、Settings
   components/               RatingScale、FactCard、GapIndicator、
                             DiagnosticsPanel、ErrorBoundary
-  dev/                      30 天演示数据，仅开发用，被 __DEV__ 包住
+  dev/                      30 天演示数据。仅开发用：metro.config.js 在生产构建时
+                            把 seed.ts 换成空壳——Metro 不做 code splitting，
+                            光靠 __DEV__ 或动态 import() 都拦不住
 ```
 
 ## 值得知道的约定

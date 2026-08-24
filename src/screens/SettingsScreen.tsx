@@ -12,7 +12,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppState } from '../store/AppContext';
 import { exportAllData, deleteAllData, getFactLogCount, getAllSelfPortraits } from '../database';
-import { seedDemoData } from '../dev/seed';
 import { importAllData } from '../database';
 import { validateImport } from '../utils/importValidation';
 import * as DocumentPicker from 'expo-document-picker';
@@ -203,6 +202,9 @@ export default function SettingsScreen({ onReassess }: Props) {
     if (!ok) return;
     setSeeding(true);
     try {
+      // 动态 import：静态引入会把 100KB 演示文本连同十种语言一起打进正式包，
+      // 而这块本该「__DEV__ 为 false 时整块不存在」。
+      const { seedDemoData } = await import('../dev/seed');
       const r = await seedDemoData(locale);
       await setOnboardingDone(true);
       setFactCount(r.facts);
