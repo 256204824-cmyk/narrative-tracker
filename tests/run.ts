@@ -19,6 +19,12 @@ import { SYSTEM_PROMPT, REQUIRED_OUTPUT_FIELDS } from '../src/services/analysisP
 import { demoTextFor } from '../src/dev/demoText/index.ts';
 import { DEMO_SKELETON } from '../src/dev/demoSkeleton.ts';
 import { gapPresentation } from '../src/components/gapPresentation.ts';
+import {
+  PROVIDER_PRESETS,
+  POLICY_RANK,
+  presetById,
+  matchPreset,
+} from '../src/services/providerPresets.ts';
 import { zhHansDemo } from '../src/dev/demoText/zhHans.ts';
 
 let passed = 0;
@@ -449,6 +455,49 @@ group('置信度必须调制呈现强度（PRD 5.2）', () => {
     ok(`${loc} 稀疏说明含天数`, m.feedback.lowConfidenceSparse(5, 30).includes('5'));
     // 降级标签不能和判决标签雷同，否则等于没降级
     ok(`${loc} 降级标签不同于「差距较大」`, m.feedback.lowConfidenceLabel !== m.feedback.lowMatch);
+  }
+});
+
+// ────────────────────────────────────────────────
+group('Provider 预设', () => {
+  // 排序原则是隐私而不是免费——这是产品立场，不能被以后随手改掉
+  const ranks = PROVIDER_PRESETS.map((p) => POLICY_RANK[p.policy]);
+  ok('按隐私强度升序排列', ranks.every((r, i) => i === 0 || ranks[i - 1] <= r));
+  check('最安全的是本机模型', PROVIDER_PRESETS[0].policy, 'local');
+  ok('会训练数据的排在最后', POLICY_RANK[PROVIDER_PRESETS[PROVIDER_PRESETS.length - 1].policy] >= POLICY_RANK.mayTrain);
+  ok('至少有一个本机选项', PROVIDER_PRESETS.some((p) => p.policy === 'local'));
+  ok('至少有一个免费且不训练的云服务',
+    PROVIDER_PRESETS.some((p) => p.free && p.policy === 'noRetainNoTrain' && p.needsKey));
+
+  // 每条预设本身要合法，否则一点就坏
+  for (const p of PROVIDER_PRESETS) {
+    const check1 = checkBaseUrl(p.baseUrl);
+    ok(`${p.id} 的 base URL 合法`, check1.ok);
+    ok(`${p.id} 已归一化`, normalizeBaseUrl(p.baseUrl) === p.baseUrl);
+    ok(`${p.id} 有模型名`, p.model.length > 0);
+    ok(`${p.id} 不带 /chat/completions`, !p.baseUrl.includes('/chat/completions'));
+    // 本机服务不该要求 Key，云服务必须要求
+    check(`${p.id} 的 needsKey 与 local 一致`, p.needsKey, p.policy !== 'local');
+  }
+
+  check('id 唯一', new Set(PROVIDER_PRESETS.map((p) => p.id)).size, PROVIDER_PRESETS.length);
+  check('base URL 唯一', new Set(PROVIDER_PRESETS.map((p) => p.baseUrl)).size, PROVIDER_PRESETS.length);
+
+  ok('presetById 能查到', presetById('groq')?.name === 'Groq');
+  ok('presetById 查不到返回 undefined', presetById('nope') === undefined);
+  ok('matchPreset 匹配已知地址', matchPreset('https://api.groq.com/openai/v1')?.id === 'groq');
+  ok('matchPreset 容忍尾斜杠', matchPreset('https://api.groq.com/openai/v1/')?.id === 'groq');
+  ok('matchPreset 自定义地址返回 undefined', matchPreset('https://example.com/v1') === undefined);
+
+  // 每种政策都要有对应文案，否则界面上是空白
+  for (const loc of SUPPORTED_LOCALES) {
+    const m = messagesFor(loc);
+    const texts = [
+      m.settings.policyLocal, m.settings.policyNoRetainNoTrain,
+      m.settings.policyRetainNoTrain, m.settings.policyMayTrain, m.settings.policyUnknown,
+    ];
+    ok(`${loc} 五种数据政策文案齐备`, texts.every((x) => x.length > 0));
+    ok(`${loc} 五种政策文案互不相同`, new Set(texts).size === 5);
   }
 });
 

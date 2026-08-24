@@ -86,6 +86,11 @@ docs/
 
 我们不拥有你的数据。我们不读取你的其他 App。我们不建立服务器。
 
+设置页内置了常用服务商列表，**按隐私强度排序而不是按免费程度** ——
+有些免费额度之所以免费，正是因为你的 prompt 会变成训练数据，
+而这个 App 送出去的东西不适合进训练集。见
+[怎么选服务商](providers.zh-Hans.md)。
+
 详见 [privacy.zh-Hans.md](privacy.zh-Hans.md) 和 [data-flow.zh-Hans.md](data-flow.zh-Hans.md)。
 
 ## 开源许可

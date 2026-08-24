@@ -159,6 +159,16 @@ export const en: Messages = {
     providerNeedModelBody:
       'Model names differ per provider, e.g. gpt-4o-mini or deepseek-chat.',
     providerSavedBody: 'Future requests will go to this address.',
+    presetsTitle: 'Common providers',
+    presetsDesc: 'Sorted by privacy, not by price. This app sends your most personal notes — check what a provider does with them before checking whether it is free.',
+    presetFree: 'free tier',
+    presetNoKey: 'no key needed',
+    presetApplied: (name: string) => `Switched to ${name}. You may need to adjust the model name to whatever they currently offer.`,
+    policyLocal: 'never leaves your device',
+    policyNoRetainNoTrain: 'not retained, not used for training',
+    policyRetainNoTrain: 'not used for training; kept briefly for abuse monitoring',
+    policyMayTrain: 'may be used to improve models, including human review',
+    policyUnknown: 'not verified — read their privacy policy yourself',
     providerReset: 'Reset to default (OpenAI)',
     providerResetDone: 'Reset to default',
 

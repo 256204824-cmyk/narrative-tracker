@@ -18,6 +18,12 @@ import { importAllData } from '../database';
 import { validateImport } from '../utils/importValidation';
 import * as DocumentPicker from 'expo-document-picker';
 import { readTextFile } from '../utils/readTextFile';
+import {
+  PROVIDER_PRESETS,
+  matchPreset,
+  type DataPolicy,
+  type ProviderPreset,
+} from '../services/providerPresets';
 import { useT } from '../i18n/useT';
 import { TIER_LIMITS } from '../constants/questions';
 import { localeOptions, messagesFor, type LocalePreference } from '../i18n';
@@ -57,6 +63,7 @@ export default function SettingsScreen({ onReassess }: Props) {
   const [editingProvider, setEditingProvider] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [presetsOpen, setPresetsOpen] = useState(false);
   const [importing, setImporting] = useState(false);
 
   // 用 useFocusEffect 而不是 useEffect：重评页是模态，返回时本组件不会重新挂载，
@@ -111,6 +118,26 @@ export default function SettingsScreen({ onReassess }: Props) {
     setBaseUrl(normalizeBaseUrl(baseUrl));
     setEditingProvider(false);
     notify(t.common.saved, check.warning ?? t.settings.providerSavedBody);
+  };
+
+  const policyText = (policy: DataPolicy) =>
+    policy === 'local'
+      ? t.settings.policyLocal
+      : policy === 'noRetainNoTrain'
+        ? t.settings.policyNoRetainNoTrain
+        : policy === 'retainNoTrain'
+          ? t.settings.policyRetainNoTrain
+          : policy === 'mayTrain'
+            ? t.settings.policyMayTrain
+            : t.settings.policyUnknown;
+
+  const applyPreset = async (preset: ProviderPreset) => {
+    await saveProviderConfig({ baseUrl: preset.baseUrl, model: preset.model });
+    setBaseUrl(preset.baseUrl);
+    setModel(preset.model);
+    setPresetsOpen(false);
+    setEditingProvider(false);
+    notify(t.common.saved, t.settings.presetApplied(preset.name));
   };
 
   const handleResetProvider = async () => {
@@ -334,6 +361,46 @@ export default function SettingsScreen({ onReassess }: Props) {
             {t.settings.providerDesc}
           </Text>
 
+          <Text style={styles.presetsLabel}>{t.settings.presetsTitle}</Text>
+          <Text style={styles.presetsDesc}>{t.settings.presetsDesc}</Text>
+
+          <TouchableOpacity style={styles.localeToggle} onPress={() => setPresetsOpen((v) => !v)}>
+            <Text style={styles.localeCurrent}>
+              {matchPreset(baseUrl)?.name ?? baseUrl}
+            </Text>
+            <Text style={styles.localeChevron}>{presetsOpen ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+
+          {presetsOpen && (
+            <View style={styles.localeList}>
+              {PROVIDER_PRESETS.map((preset) => {
+                const selected = matchPreset(baseUrl)?.id === preset.id;
+                const risky = preset.policy === 'mayTrain' || preset.policy === 'unknown';
+                return (
+                  <TouchableOpacity
+                    key={preset.id}
+                    style={[styles.presetRow, selected && styles.localeRowSelected]}
+                    onPress={() => applyPreset(preset)}
+                  >
+                    <View style={styles.presetHead}>
+                      <Text style={[styles.localeName, selected && styles.localeNameSelected]}>
+                        {preset.name}
+                      </Text>
+                      {preset.free && <Text style={styles.tagFree}>{t.settings.presetFree}</Text>}
+                      {!preset.needsKey && (
+                        <Text style={styles.tagNoKey}>{t.settings.presetNoKey}</Text>
+                      )}
+                      {selected && <Text style={styles.localeCheck}>✓</Text>}
+                    </View>
+                    <Text style={[styles.presetPolicy, risky && styles.presetPolicyRisky]}>
+                      {policyText(preset.policy)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+
           {editingProvider ? (
             <View>
               <Text style={styles.fieldLabel}>{t.settings.baseUrlLabel}</Text>
@@ -554,6 +621,37 @@ const styles = StyleSheet.create({
   localeCurrent: { fontSize: 15, color: '#1a1a2e', fontWeight: '600', flexShrink: 1 },
   localeChevron: { fontSize: 10, color: '#999', marginLeft: 8 },
   localeList: { marginTop: 8, borderRadius: 12, backgroundColor: '#fff', overflow: 'hidden' },
+  presetsLabel: { fontSize: 13, fontWeight: '700', color: '#555', marginTop: 12 },
+  presetsDesc: { fontSize: 12, color: '#999', lineHeight: 17, marginTop: 4 },
+  presetRow: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2f2f7',
+  },
+  presetHead: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  tagFree: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#15803d',
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  tagNoKey: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#475569',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  presetPolicy: { fontSize: 12, color: '#64748b', marginTop: 4, lineHeight: 17 },
+  presetPolicyRisky: { color: '#b45309' },
   localeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -69,6 +69,11 @@ Any OpenAI-compatible endpoint works, including models running on your own
 machine. Point it at `http://localhost:11434/v1` and nothing leaves your LAN
 at all.
 
+Settings ships a list of common providers **sorted by privacy, not by price** —
+because several free tiers are free precisely because your prompts become
+training data, and what this app sends is not the kind of thing you want in a
+training set. See [choosing a provider](docs/providers.md).
+
 ## Privacy
 
 | Data | Where it lives | Sent to a developer server? |
@@ -130,6 +135,7 @@ SQLite migrations.
 
 - [Product requirements](docs/product-requirements.md) (Chinese, v2.0 — the
   authoritative spec)
+- [Choosing a provider](docs/providers.md)
 - [Privacy policy](docs/privacy.md)
 - [Data flow](docs/data-flow.md)
 - [Phase 0 materials](docs/phase-0.md)
