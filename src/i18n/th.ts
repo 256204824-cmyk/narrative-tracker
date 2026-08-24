@@ -85,6 +85,10 @@ export const th: Messages = {
     alignment: 'ความสอดคล้องระหว่างคำบอกเล่ากับการกระทำ',
     highMatch: 'สอดคล้องมาก', partialMatch: 'สอดคล้องบางส่วน', lowMatch: 'ต่างกันชัดเจน',
     confidenceHigh: 'ความมั่นใจสูง', confidenceMedium: 'ความมั่นใจปานกลาง', confidenceLow: 'ความมั่นใจต่ำ',
+    lowConfidenceLabel: 'บันทึกยังน้อยเกินกว่าจะสรุป',
+    lowConfidenceNoteGeneric: 'หลักฐานที่รองรับข้อสรุปครั้งนี้ยังบาง ให้ดูคะแนนด้านล่างเป็นเพียงตัวเลขคร่าว ๆ',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `ใน ${window} วันล่าสุด มีบันทึกเพียง ${days} วัน บันทึกเพิ่มอีกไม่กี่วัน ผลจะน่าเชื่อถือขึ้นมาก`,
     summary: 'สรุป',
     matched: '✓ จุดที่ข้อเท็จจริงสอดคล้อง',
     gaps: '! จุดที่ข้อเท็จจริงต่างออกไป',

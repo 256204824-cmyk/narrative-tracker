@@ -85,6 +85,10 @@ export const fr: Messages = {
     alignment: 'Cohérence entre récit et comportement',
     highMatch: 'Très cohérent', partialMatch: 'Partiellement cohérent', lowMatch: 'Écart notable',
     confidenceHigh: 'Confiance élevée', confidenceMedium: 'Confiance moyenne', confidenceLow: 'Confiance faible',
+    lowConfidenceLabel: 'Trop peu de notes pour conclure pour l’instant',
+    lowConfidenceNoteGeneric: 'Les éléments qui soutiennent ce constat sont minces : prenez le score comme un simple indice.',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `Seulement ${days} des ${window} derniers jours comportent des notes. Quelques jours de plus et ce sera bien plus fiable.`,
     summary: 'Résumé',
     matched: '✓ Ce que les faits confirment',
     gaps: '! Ce que les faits nuancent',

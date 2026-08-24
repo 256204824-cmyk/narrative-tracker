@@ -114,6 +114,10 @@ export const zhHans = {
     confidenceHigh: '置信度高',
     confidenceMedium: '置信度中',
     confidenceLow: '置信度低',
+    lowConfidenceLabel: '记录还太少，先不下结论',
+    lowConfidenceNoteGeneric: '这次结论的证据不够扎实，下面的分数只能当粗略参考。',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `最近 ${window} 天里只有 ${days} 天有记录。再记几天，结论会可靠得多。`,
     summary: '总结',
     matched: '✓ 一致的地方',
     gaps: '! 不一致的地方',

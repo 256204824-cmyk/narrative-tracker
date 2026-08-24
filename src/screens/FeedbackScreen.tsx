@@ -28,6 +28,7 @@ export default function FeedbackScreen() {
   const [result, setResult] = useState<AIAnalysisOutput | null>(null);
   const [previousAnalyses, setPreviousAnalyses] = useState<AnalysisResult[]>([]);
   const [factCount, setFactCount] = useState(0);
+  const [recordedDays, setRecordedDays] = useState(0);
 
   const maxDays = TIER_LIMITS[tier] ?? TIER_LIMITS.free;
 
@@ -38,6 +39,7 @@ export default function FeedbackScreen() {
 
       const facts = await getFactLogsBetween(daysAgo(maxDays - 1), today());
       setFactCount(facts.length);
+      setRecordedDays(countDistinctDays(facts));
     } catch (err) {
       // 静默失败会让界面显示 0 条事实，用户无法区分「没数据」和「读取出错」
       setError(t.feedback.loadFailed);
@@ -102,6 +104,7 @@ export default function FeedbackScreen() {
       // 按「不同的天数」而不是「条数」判断证据是否充足。
       // 同一天连写三条并不能说明任何跨时间的模式（PRD 5.2）。
       const distinctDays = countDistinctDays(facts);
+      setRecordedDays(distinctDays);
       if (distinctDays < MIN_DAYS_FOR_ANALYSIS) {
         setError(
           t.feedback.needMoreDays(maxDays, distinctDays, MIN_DAYS_FOR_ANALYSIS - distinctDays)
@@ -186,7 +189,12 @@ export default function FeedbackScreen() {
 
         {result && (
           <View style={styles.resultSection}>
-            <GapIndicator alignmentScore={result.alignment_score} confidence={result.confidence} />
+            <GapIndicator
+              alignmentScore={result.alignment_score}
+              confidence={result.confidence}
+              recordedDays={recordedDays}
+              windowDays={maxDays}
+            />
 
             <View style={styles.summaryCard}>
               <Text style={styles.sectionTitle}>{t.feedback.summary}</Text>

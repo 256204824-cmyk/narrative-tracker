@@ -85,6 +85,10 @@ export const ja: Messages = {
     alignment: '語りと行動の一致度',
     highMatch: 'よく一致', partialMatch: '部分的に一致', lowMatch: '差が目立つ',
     confidenceHigh: '確信度：高', confidenceMedium: '確信度：中', confidenceLow: '確信度：低',
+    lowConfidenceLabel: '記録がまだ少なく、結論は出せません',
+    lowConfidenceNoteGeneric: '今回の結論を支える根拠は薄めです。下のスコアはおおよその目安として見てください。',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `直近 ${window} 日のうち記録があるのは ${days} 日だけです。あと数日記録すれば、かなり確かになります。`,
     summary: 'まとめ',
     matched: '✓ 事実と一致する点',
     gaps: '! 事実と食い違う点',

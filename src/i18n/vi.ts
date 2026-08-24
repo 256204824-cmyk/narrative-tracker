@@ -85,6 +85,10 @@ export const vi: Messages = {
     alignment: 'Mức khớp giữa lời kể và hành động',
     highMatch: 'Rất khớp', partialMatch: 'Khớp một phần', lowMatch: 'Chênh lệch rõ',
     confidenceHigh: 'Độ tin cậy cao', confidenceMedium: 'Độ tin cậy vừa', confidenceLow: 'Độ tin cậy thấp',
+    lowConfidenceLabel: 'Còn quá ít ghi chép để đưa ra kết luận',
+    lowConfidenceNoteGeneric: 'Căn cứ cho kết luận lần này còn mỏng, hãy xem điểm bên dưới như một gợi ý thô.',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `Trong ${window} ngày gần nhất chỉ có ${days} ngày có ghi chép. Ghi thêm vài ngày nữa sẽ đáng tin hơn nhiều.`,
     summary: 'Tóm tắt',
     matched: '✓ Nơi sự thật đồng tình',
     gaps: '! Nơi sự thật khác đi',

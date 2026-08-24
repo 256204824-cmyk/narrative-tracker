@@ -110,6 +110,10 @@ export const en: Messages = {
     confidenceHigh: 'High confidence',
     confidenceMedium: 'Medium confidence',
     confidenceLow: 'Low confidence',
+    lowConfidenceLabel: 'Too few entries to draw a conclusion yet',
+    lowConfidenceNoteGeneric: 'The evidence behind this report is thin, so treat the score below as a rough hint.',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `Only ${days} of the last ${window} days have entries. A few more and it gets a lot more reliable.`,
     summary: 'Summary',
     matched: '✓ Where facts agree',
     gaps: '! Where facts differ',

@@ -18,6 +18,7 @@ import { inspectAnalysis, describe as describeValue, unwrapPayload } from '../sr
 import { SYSTEM_PROMPT, REQUIRED_OUTPUT_FIELDS } from '../src/services/analysisPrompt.ts';
 import { demoTextFor } from '../src/dev/demoText/index.ts';
 import { DEMO_SKELETON } from '../src/dev/demoSkeleton.ts';
+import { gapPresentation } from '../src/components/gapPresentation.ts';
 import { zhHansDemo } from '../src/dev/demoText/zhHans.ts';
 
 let passed = 0;
@@ -405,6 +406,50 @@ group('演示数据的多语言完整性', () => {
   // 骨架里的标签必须都是合法 id，否则统计会漏
   const tagIds = new Set<string>(TAG_IDS);
   ok('骨架标签都是合法 id', DEMO_SKELETON.every((d) => d.tags.every((t) => tagIds.has(t))));
+});
+
+// ────────────────────────────────────────────────
+group('置信度必须调制呈现强度（PRD 5.2）', () => {
+  // 高置信度：正常判决色
+  check('高置信 + 低分 → 红色判决', gapPresentation(32, 'high').tone, 'bad');
+  check('高置信 + 中分 → 黄色', gapPresentation(64, 'high').tone, 'warn');
+  check('高置信 + 高分 → 绿色', gapPresentation(88, 'high').tone, 'good');
+  ok('高置信不降级', !gapPresentation(32, 'high').tentative);
+
+  // 中置信度同样给判决色——降级只发生在 low
+  check('中置信仍给判决色', gapPresentation(32, 'medium').tone, 'bad');
+  ok('中置信不降级', !gapPresentation(32, 'medium').tentative);
+
+  // 低置信度：无论分数多少都不上判决色
+  for (const score of [0, 32, 64, 88, 100]) {
+    const p = gapPresentation(score, 'low');
+    check(`低置信 ${score} 分 → 中性色`, p.tone, 'neutral');
+    ok(`低置信 ${score} 分要降级`, p.tentative);
+  }
+
+  // 分数仍然钳制，且不隐藏信息
+  check('越界分数钳到 100', gapPresentation(142, 'low').score, 100);
+  check('负分钳到 0', gapPresentation(-5, 'high').score, 0);
+  check('NaN 兜底为 0', gapPresentation(NaN, 'high').score, 0);
+
+  // 只有记录确实稀疏时才点名天数——
+  // 否则会出现「最近 30 天里只有 30 天有记录」这种荒谬文案
+  ok('30 天窗口满记录不算稀疏', !gapPresentation(32, 'low', 30, 30).sparse);
+  ok('30 天里 20 天不算稀疏', !gapPresentation(32, 'low', 20, 30).sparse);
+  ok('30 天里 5 天算稀疏', gapPresentation(32, 'low', 5, 30).sparse);
+  ok('7 天里 3 天算稀疏', gapPresentation(32, 'low', 3, 7).sparse);
+  ok('缺参数时不点名天数', !gapPresentation(32, 'low').sparse);
+  ok('高置信永不点名天数', !gapPresentation(32, 'high', 1, 30).sparse);
+
+  // 文案必须齐备，否则降级后是一片空白
+  for (const loc of SUPPORTED_LOCALES) {
+    const m = messagesFor(loc);
+    ok(`${loc} 有降级标签`, m.feedback.lowConfidenceLabel.length > 0);
+    ok(`${loc} 有降级说明`, m.feedback.lowConfidenceNoteGeneric.length > 0);
+    ok(`${loc} 稀疏说明含天数`, m.feedback.lowConfidenceSparse(5, 30).includes('5'));
+    // 降级标签不能和判决标签雷同，否则等于没降级
+    ok(`${loc} 降级标签不同于「差距较大」`, m.feedback.lowConfidenceLabel !== m.feedback.lowMatch);
+  }
 });
 
 console.log(`\n${'═'.repeat(40)}`);

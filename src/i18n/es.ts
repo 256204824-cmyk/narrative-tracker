@@ -85,6 +85,10 @@ export const es: Messages = {
     alignment: 'Coherencia entre relato y conducta',
     highMatch: 'Muy coherente', partialMatch: 'Parcialmente coherente', lowMatch: 'Diferencia notable',
     confidenceHigh: 'Confianza alta', confidenceMedium: 'Confianza media', confidenceLow: 'Confianza baja',
+    lowConfidenceLabel: 'Aún hay pocos registros para sacar conclusiones',
+    lowConfidenceNoteGeneric: 'La evidencia detrás de este informe es escasa; toma la puntuación como una pista aproximada.',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `Solo ${days} de los últimos ${window} días tienen registros. Con unos días más será mucho más fiable.`,
     summary: 'Resumen',
     matched: '✓ Donde los hechos coinciden',
     gaps: '! Donde los hechos difieren',

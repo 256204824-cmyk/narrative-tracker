@@ -85,6 +85,10 @@ export const ko: Messages = {
     alignment: '서술과 행동의 일치도',
     highMatch: '거의 일치', partialMatch: '부분적으로 일치', lowMatch: '차이가 뚜렷함',
     confidenceHigh: '신뢰도 높음', confidenceMedium: '신뢰도 보통', confidenceLow: '신뢰도 낮음',
+    lowConfidenceLabel: '아직 기록이 적어 결론을 내리기 어렵습니다',
+    lowConfidenceNoteGeneric: '이번 결론을 뒷받침할 근거가 부족합니다. 아래 점수는 대략적인 참고로만 봐 주세요.',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `최근 ${window}일 중 기록이 있는 날은 ${days}일뿐입니다. 며칠만 더 기록하면 훨씬 믿을 만해집니다.`,
     summary: '요약',
     matched: '✓ 사실과 일치하는 부분',
     gaps: '! 사실과 다른 부분',

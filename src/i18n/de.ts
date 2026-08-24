@@ -85,6 +85,10 @@ export const de: Messages = {
     alignment: 'Übereinstimmung von Selbstbild und Verhalten',
     highMatch: 'Weitgehend stimmig', partialMatch: 'Teilweise stimmig', lowMatch: 'Deutlicher Unterschied',
     confidenceHigh: 'Hohe Aussagekraft', confidenceMedium: 'Mittlere Aussagekraft', confidenceLow: 'Geringe Aussagekraft',
+    lowConfidenceLabel: 'Noch zu wenige Einträge für ein Fazit',
+    lowConfidenceNoteGeneric: 'Die Grundlage für dieses Fazit ist dünn — nimm den Wert unten als groben Hinweis.',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `Nur an ${days} der letzten ${window} Tage gibt es Einträge. Ein paar Tage mehr, und es wird deutlich belastbarer.`,
     summary: 'Zusammenfassung',
     matched: '✓ Wo die Fakten übereinstimmen',
     gaps: '! Wo die Fakten abweichen',

@@ -85,6 +85,10 @@ export const zhHant: Messages = {
     alignment: '敘事-行為對齊度',
     highMatch: '高度一致', partialMatch: '部分一致', lowMatch: '差距較大',
     confidenceHigh: '信心度高', confidenceMedium: '信心度中', confidenceLow: '信心度低',
+    lowConfidenceLabel: '記錄還太少，先不下結論',
+    lowConfidenceNoteGeneric: '這次結論的證據不夠扎實，下面的分數只能當粗略參考。',
+    lowConfidenceSparse: (days: number, window: number) =>
+      `最近 ${window} 天裡只有 ${days} 天有記錄。再記幾天，結論會可靠得多。`,
     summary: '總結',
     matched: '✓ 一致的地方',
     gaps: '! 不一致的地方',
