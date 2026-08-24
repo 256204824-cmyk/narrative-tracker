@@ -10,9 +10,9 @@ import { normalizeBaseUrl, checkBaseUrl } from '../src/services/providerUrl.ts';
 const DEFAULT_BASE_URL = 'https://api.openai.com/v1';
 import { validateImport } from '../src/utils/importValidation.ts';
 import { TIER_LIMITS, MIN_DAYS_FOR_ANALYSIS, tagLabel, normalizeTag, TAG_IDS } from '../src/constants/questions.ts';
-import { zh } from '../src/i18n/zh.ts';
+import { zhHans } from '../src/i18n/zhHans.ts';
 import { en } from '../src/i18n/en.ts';
-import { messagesFor, setActiveLocale, resolveLocaleTag, t as activeMessages } from '../src/i18n/catalog.ts';
+import { messagesFor, setActiveLocale, resolveLocaleTag, migrateStoredLocale, localeOptions, t as activeMessages } from '../src/i18n/catalog.ts';
 import { SUPPORTED_LOCALES } from '../src/i18n/types.ts';
 
 let passed = 0;
@@ -150,7 +150,11 @@ group('多语言', () => {
     }
     return [prefix];
   };
-  check('zh 与 en 的键完全一致', shape(en).sort(), shape(zh).sort());
+  // 每种语言都要和简体中文（真源）键完全一致
+  const reference = shape(zhHans).sort();
+  for (const loc of SUPPORTED_LOCALES) {
+    check(`${loc} 的键与 zh-Hans 完全一致`, shape(messagesFor(loc)).sort(), reference);
+  }
 
   for (const loc of SUPPORTED_LOCALES) {
     const m = messagesFor(loc);
@@ -161,20 +165,39 @@ group('多语言', () => {
     ok(`${loc} 标签全部有译名`, TAG_IDS.every((id) => !!(m.questions.tags as Record<string, string>)[id]));
   }
 
-  // 文案确实随语言切换
-  ok('zh 与 en 的标题不同', zh.home.title !== en.home.title);
-  ok('带参文案也切换', zh.home.counted(3) !== en.home.counted(3));
+  // 每种语言的标题必须两两不同，避免复制粘贴后忘了翻译
+  const titles = SUPPORTED_LOCALES.map((l) => messagesFor(l).home.title);
+  check('各语言标题互不重复', new Set(titles).size, SUPPORTED_LOCALES.length);
+  ok('带参文案也切换', zhHans.home.counted(3) !== en.home.counted(3));
+  check('设置页语言选项数量', localeOptions().length, SUPPORTED_LOCALES.length);
 
-  check('语言标签收敛 zh-Hans-CN', resolveLocaleTag('zh-Hans-CN'), 'zh');
-  check('语言标签收敛 en-US', resolveLocaleTag('en-US'), 'en');
-  check('不支持的语言返回 null', resolveLocaleTag('fr-FR'), null);
+  // 简繁必须区分开——两者的基础码都是 zh
+  check('zh-Hans-CN', resolveLocaleTag('zh-Hans-CN'), 'zh-Hans');
+  check('zh-CN', resolveLocaleTag('zh-CN'), 'zh-Hans');
+  check('裸 zh 默认简体', resolveLocaleTag('zh'), 'zh-Hans');
+  check('zh-Hant-TW', resolveLocaleTag('zh-Hant-TW'), 'zh-Hant');
+  check('zh-TW 无 script 也判繁体', resolveLocaleTag('zh-TW'), 'zh-Hant');
+  check('zh-HK', resolveLocaleTag('zh-HK'), 'zh-Hant');
+  check('zh-MO', resolveLocaleTag('zh-MO'), 'zh-Hant');
+  check('en-US', resolveLocaleTag('en-US'), 'en');
+  check('ja-JP', resolveLocaleTag('ja-JP'), 'ja');
+  check('th-TH', resolveLocaleTag('th-TH'), 'th');
+  check('vi-VN', resolveLocaleTag('vi-VN'), 'vi');
+  check('不支持的语言返回 null', resolveLocaleTag('pt-BR'), null);
   check('空值返回 null', resolveLocaleTag(null), null);
 
+  // 旧版只存 'zh' / 'en'，不迁移的话老用户的选择会被丢弃
+  check('旧值 zh 迁移到 zh-Hans', migrateStoredLocale('zh'), 'zh-Hans');
+  check('旧值 en 保持', migrateStoredLocale('en'), 'en');
+  check('system 保持', migrateStoredLocale('system'), 'system');
+  check('无法识别的值返回 null', migrateStoredLocale('klingon'), null);
+
   // 模块级当前语言
-  setActiveLocale('zh');
-  check('t() 跟随 setActiveLocale(zh)', activeMessages().home.title, zh.home.title);
+  setActiveLocale('zh-Hant');
+  check('t() 跟随 zh-Hant', activeMessages().home.title, messagesFor('zh-Hant').home.title);
+  setActiveLocale('ja');
+  check('t() 跟随 ja', activeMessages().home.title, messagesFor('ja').home.title);
   setActiveLocale('en');
-  check('t() 跟随 setActiveLocale(en)', activeMessages().home.title, en.home.title);
 });
 
 // ────────────────────────────────────────────────
@@ -183,7 +206,7 @@ group('标签 id 与旧数据兼容', () => {
   check('id 保持不变', normalizeTag('study'), 'study');
   check('未知值原样返回', normalizeTag('whatever'), 'whatever');
 
-  setActiveLocale('zh');
+  setActiveLocale('zh-Hans');
   check('中文界面下 id 显示中文', tagLabel('study'), '学习');
   check('中文界面下旧数据也显示中文', tagLabel('学习'), '学习');
   setActiveLocale('en');

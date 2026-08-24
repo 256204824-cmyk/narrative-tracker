@@ -1,79 +1,139 @@
 # Narrative Tracker
 
-**看见你以为的自己，和你真实行动之间的距离。**
+**See the distance between who you think you are and what you actually do.**
 
-一个帮助年轻人用自己提交的事实，校准自我认知的本地 AI 工具。
+A local-first tool that helps you calibrate your self-image against facts you
+choose to submit — nothing else.
+
+[简体中文](docs/README.zh-Hans.md)
 
 ---
 
-## 核心原则
+## Why
 
-- **Local-first** — 所有数据存储在你的设备上
-- **No server** — 没有后端，没有云数据库
-- **No tracking** — 不监控、不截屏、不读取其他 App
-- **Bring your own AI key** — 使用你自己的 OpenAI API Key
-- **Open source** — 代码完全开源，数据流可验证
+Most people aren't lying to themselves on purpose. They just have no steady
+feedback loop. So they say things like:
 
-## 它是怎么工作的
+> I'm disciplined. · I've been working hard lately. · I'm bad at socialising.
+> · I always procrastinate. · I'm too stressed to get anything done.
 
-1. **自我画像** — 首次使用时，回答关于你如何看待自己的问题
-2. **事实日志** — 每天花 30-60 秒记录你实际做了什么（和没做什么）
-3. **叙事审计** — AI 对比你的自我描述和事实记录，找出：
-   - 一致的地方
-   - 不一致的地方
-   - 可能被你低估的进步
-   - 可能被你高估的能力
-   - 证据不足、无法判断的地方
+Any of those might be true. They might also be a story that hardened years ago
+and never got checked. Narrative Tracker doesn't judge you and doesn't watch
+you. It takes the facts **you** submit and helps you see:
 
-## 技术栈
+- What do I think I'm like?
+- What did I actually do?
+- Do those two agree?
+- Where they don't — how far apart are they?
 
-- React Native (Expo SDK 57)
-- SQLite（本地数据库）
-- SecureStore（API Key 安全存储）
-- OpenAI-compatible API（用户自带 Key）
+## Principles
 
-## 快速开始
+These are constraints, not marketing. A feature that violates any of them
+does not ship.
+
+1. **No surveillance.** No screenshots, no screen time, no reading other apps,
+   no location, no contacts, no health data, no financial data. If a feature
+   requires watching you without your say-so, it doesn't get built.
+2. **You submit the facts.** The app only analyses what you actively typed and
+   actively saved.
+3. **The data is yours.** No server, no account, no cloud sync, no cloud
+   database. Everything stays on your device, and you can export all of it or
+   delete all of it at any time.
+4. **The AI is a mirror, not a judge.** Every conclusion must cite a specific
+   fact you submitted. When the evidence is thin it has to say so instead of
+   reaching. No diagnosing, no shaming, no orders.
+5. **Open source so you can verify it.** For a privacy tool, "trust us" isn't
+   good enough. Read the code and check that nothing leaves your device.
+
+## How it works
+
+1. **Self-portrait** — answer a few questions about how you see yourself.
+   Re-do it whenever you like; every version is kept, because how your story
+   changes over time is the point.
+2. **Daily facts** — 30–60 seconds. What you actually did, what you planned
+   and skipped, what you avoided.
+3. **Narrative audit** — when *you* ask for it, the AI compares the two and
+   reports where they agree, where they don't, what you may be underrating,
+   and what there simply isn't enough evidence to say.
+
+Analysis never runs on its own. You decide when to look.
+
+## Bring your own key
+
+There is no backend. Your requests go straight from your device to whichever
+AI provider you configure, using your own API key. The key is stored in the
+system keychain (iOS Keychain / Android Keystore) — never in the database,
+never in logs, never uploaded.
+
+Any OpenAI-compatible endpoint works, including models running on your own
+machine. Point it at `http://localhost:11434/v1` and nothing leaves your LAN
+at all.
+
+## Privacy
+
+| Data | Where it lives | Sent to a developer server? |
+|---|---|---|
+| Self-portraits | Your device | No |
+| Fact log | Your device | No |
+| AI reports | Your device | No |
+| API key | System secure storage | No |
+
+The only outbound network request the app ever makes is the AI analysis call —
+to the provider *you* chose, containing only your self-portrait and the fact
+log for the window you selected. See [docs/data-flow.md](docs/data-flow.md).
+
+## Languages
+
+简体中文 · 繁體中文 · English · 日本語 · 한국어 · Español · Français ·
+Deutsch · Tiếng Việt · ภาษาไทย
+
+Follows your device language by default; switchable in Settings. The AI writes
+its reports in the same language.
+
+Adding one is a single file — copy `src/i18n/en.ts`, translate it, and the
+compiler will tell you exactly what you missed.
+
+> Translations beyond Chinese and English have not been reviewed by native
+> speakers. Tone is part of this product (see PRD §5.3) — corrections are very
+> welcome.
+
+## Getting started
 
 ```bash
-# 安装依赖
 npm install
-
-# 启动开发服务器
-npx expo start
-
-# 在 iOS 模拟器运行
-npx expo start --ios
-
-# 在 Android 模拟器运行
-npx expo start --android
+npx expo start          # scan the QR code with Expo Go
 ```
 
-## 项目结构
+No Xcode or Android SDK needed — Expo Go bundles everything this app uses.
 
-```
-src/
-  database/        # SQLite 数据库层
-  services/        # AI API 调用、Key 管理
-  components/      # 通用 UI 组件
-  screens/         # 界面
-    OnboardingScreen   # 初始自我画像
-    HomeScreen         # 事实日志
-    FeedbackScreen     # AI 分析报告
-    SettingsScreen     # 设置
-  store/           # App 状态
-  types/           # TypeScript 类型
-  constants/       # 问题定义
-docs/
-  privacy.md       # 隐私策略
-  data-flow.md     # 数据流说明
+```bash
+npm test                # pure-logic unit tests, no build step
+npx tsc --noEmit        # type check
 ```
 
-## 隐私
+## Tech
 
-我们不拥有你的数据。我们不读取你的其他 App。我们不建立服务器。
+React Native (Expo SDK 57) · TypeScript · SQLite (`expo-sqlite`) ·
+`expo-secure-store` · OpenAI-compatible API
 
-详见 [docs/privacy.md](docs/privacy.md) 和 [docs/data-flow.md](docs/data-flow.md)。
+## Status
 
-## 开源许可
+The local loop works end to end. **Phase 0 — the 5–10 person manual
+validation the PRD asks for — has not happened yet**, and until it does no
+new features should be added. Materials for running it are in
+[docs/phase-0.md](docs/phase-0.md).
 
-MIT License
+Not built yet: in-app purchases (tiers are currently a free local toggle) and
+SQLite migrations.
+
+## Docs
+
+- [Product requirements](docs/product-requirements.md) (Chinese, v2.0 — the
+  authoritative spec)
+- [Privacy policy](docs/privacy.md)
+- [Data flow](docs/data-flow.md)
+- [Phase 0 materials](docs/phase-0.md)
+
+## Licence
+
+MIT

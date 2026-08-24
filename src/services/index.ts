@@ -2,6 +2,7 @@ import { secureGet, secureSet, secureDelete } from './storage';
 import type { AIAnalysisOutput, Tier, SelfPortrait, FactLog } from '../types';
 import { getProviderConfig } from './provider';
 import type { LocalePreference } from '../i18n/types';
+import { migrateStoredLocale } from '../i18n/catalog';
 import { t } from '../i18n';
 import { tagLabel } from '../constants/questions';
 
@@ -63,7 +64,9 @@ export async function saveLocalePreference(pref: LocalePreference): Promise<void
 
 export async function getLocalePreference(): Promise<LocalePreference> {
   const value = await secureGet(LOCALE_STORE_KEY);
-  return value === 'zh' || value === 'en' ? value : 'system';
+  // 只支持 zh / en 时期存下来的 'zh' 现在不是合法的 Locale，
+  // 不迁移的话老用户的语言选择会被静默丢弃。
+  return migrateStoredLocale(value) ?? 'system';
 }
 
 // ── AI Analysis ──

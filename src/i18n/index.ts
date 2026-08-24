@@ -7,9 +7,11 @@ export { SUPPORTED_LOCALES } from './types';
 export {
   DEFAULT_LOCALE,
   resolveLocaleTag,
-  messagesFor,
   setActiveLocale,
   getActiveLocale,
+  localeOptions,
+  migrateStoredLocale,
+  messagesFor,
   t,
 } from './catalog';
 

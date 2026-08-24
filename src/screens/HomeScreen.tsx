@@ -114,7 +114,7 @@ export default function HomeScreen({ onNavigateToFeedback }: Props) {
         {showForm && (
           <View style={styles.formCard}>
             <Text style={styles.formTitle}>
-              {new Date().toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
+              {new Date().toLocaleDateString(locale, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',

@@ -20,7 +20,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { readTextFile } from '../utils/readTextFile';
 import { useT } from '../i18n/useT';
 import { TIER_LIMITS } from '../constants/questions';
-import { SUPPORTED_LOCALES, messagesFor, type LocalePreference } from '../i18n';
+import { localeOptions, type LocalePreference } from '../i18n';
 import { today } from '../utils/date';
 import { notify, confirmDestructive } from '../utils/dialog';
 import type { SelfPortrait } from '../types';
@@ -458,20 +458,25 @@ export default function SettingsScreen({ onReassess }: Props) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.settings.languageTitle}</Text>
           <Text style={styles.sectionDesc}>{t.settings.languageDesc}</Text>
-          <View style={styles.tierRow}>
-            {(['system', ...SUPPORTED_LOCALES] as LocalePreference[]).map((pref) => (
-              <TouchableOpacity
-                key={pref}
-                style={[styles.tierCard, localePreference === pref && styles.tierCardSelected]}
-                onPress={() => setLocalePreference(pref)}
-              >
-                <Text
-                  style={[styles.tierLabel, localePreference === pref && styles.tierLabelSelected]}
-                >
-                  {pref === 'system' ? t.settings.languageSystem : messagesFor(pref).locale.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          {/* 11 个选项塞不进三列网格，改用竖排列表 */}
+          <View style={styles.localeList}>
+            {[{ locale: 'system' as const, name: t.settings.languageSystem }, ...localeOptions()].map(
+              (opt) => {
+                const selected = localePreference === opt.locale;
+                return (
+                  <TouchableOpacity
+                    key={opt.locale}
+                    style={[styles.localeRow, selected && styles.localeRowSelected]}
+                    onPress={() => setLocalePreference(opt.locale as LocalePreference)}
+                  >
+                    <Text style={[styles.localeName, selected && styles.localeNameSelected]}>
+                      {opt.name}
+                    </Text>
+                    {selected && <Text style={styles.localeCheck}>✓</Text>}
+                  </TouchableOpacity>
+                );
+              }
+            )}
           </View>
         </View>
 
@@ -514,6 +519,20 @@ const styles = StyleSheet.create({
   resetBtn: { paddingVertical: 12, alignItems: 'center' },
   resetBtnText: { color: '#888', fontSize: 13, fontWeight: '600' },
   devSection: { borderWidth: 1, borderColor: '#fde68a', backgroundColor: '#fffbeb' },
+  localeList: { marginTop: 12, borderRadius: 12, backgroundColor: '#fff', overflow: 'hidden' },
+  localeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2f2f7',
+  },
+  localeRowSelected: { backgroundColor: '#eef2ff' },
+  localeName: { fontSize: 15, color: '#333' },
+  localeNameSelected: { color: '#4f46e5', fontWeight: '700' },
+  localeCheck: { fontSize: 15, color: '#4f46e5', fontWeight: '700' },
   portraitList: { marginTop: 12, gap: 8 },
   portraitRow: { borderLeftWidth: 2, borderLeftColor: '#e8e8f0', paddingLeft: 10, paddingVertical: 2 },
   portraitDate: { fontSize: 13, fontWeight: '600', color: '#555' },
