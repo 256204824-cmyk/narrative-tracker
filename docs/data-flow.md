@@ -1,119 +1,146 @@
-# 数据流说明
+# Data Flow
 
-## 架构概览
+> [简体中文](data-flow.zh-Hans.md)
 
-Narrative Tracker 是一个完全本地运行的应用。不存在开发者服务器。
+This document exists so you can **check the privacy claims yourself** instead
+of believing them. It names the exact files to read.
 
-```
-┌────────────────────────────────────────┐
-│               用户设备                  │
-│                                        │
-│  ┌──────────┐    ┌──────────┐          │
-│  │ 自我画像  │    │ 事实日志  │          │
-│  │ (SQLite) │    │ (SQLite) │          │
-│  └────┬─────┘    └────┬─────┘          │
-│       │               │                │
-│       └───────┬───────┘                │
-│               │                        │
-│               ▼                        │
-│       ┌──────────────┐                 │
-│       │  分析引擎     │                 │
-│       │  (本地逻辑)   │                 │
-│       └──────┬───────┘                 │
-│              │                         │
-│              ▼                         │
-│       ┌──────────────┐                 │
-│       │  构建 Prompt  │                 │
-│       └──────┬───────┘                 │
-│              │                         │
-│              │  HTTPS (直接连接)        │
-│              ▼                         │
-│       ┌──────────────┐                 │
-│       │ 用户自己的    │                 │
-│       │ AI API Key    │                 │
-│       │ (Keychain/    │                 │
-│       │  Keystore)    │                 │
-│       └──────┬───────┘                 │
-│              │                         │
-└──────────────┼─────────────────────────┘
-               │
-               ▼
-    ┌──────────────────┐
-    │  OpenAI API      │
-    │  (或兼容服务)     │
-    │                  │
-    │  开发者无法访问   │
-    └──────────────────┘
-```
+## Overview
 
-## 数据流步骤
-
-### 1. 数据写入（仅本地）
+Narrative Tracker runs entirely on your device. There is no developer server.
 
 ```
-用户输入 → 表单验证 → SQLite INSERT → 本地持久化
+┌─────────────────────────── your device ───────────────────────────┐
+│                                                                   │
+│   self-portraits ─┐                                               │
+│   fact log ───────┼──▶  SQLite  (app-private storage)             │
+│   reports ────────┘         │                                     │
+│                             │  read only when you tap             │
+│                             │  "Generate report"                  │
+│                             ▼                                     │
+│                      build the prompt                             │
+│                             │                                     │
+│   API key ──────────────────┤                                     │
+│   (Keychain / Keystore)     │                                     │
+│                             │                                     │
+└─────────────────────────────┼─────────────────────────────────────┘
+                              │  HTTPS, direct
+                              ▼
+                  the endpoint YOU configured
+                  (OpenAI by default; can be
+                   a model on your own machine)
+
+                  ── no developer server anywhere in this diagram ──
 ```
 
-所有用户输入的自我画像和事实日志直接写入设备上的 SQLite 数据库。没有网络请求。
+There is no "local analysis engine". The comparison is done by the model you
+chose. The app's job is to decide **what is allowed into the prompt** and to
+validate what comes back.
 
-### 2. AI 分析请求（用户主动触发）
+## The four flows
 
-```
-用户点击"生成分析报告"
-  → 从 SQLite 读取自我画像
-  → 从 SQLite 读取指定时间范围的事实日志
-  → 从 Keychain/Keystore 读取 API Key
-  → 构建分析 Prompt
-  → HTTPS POST 到 api.openai.com（或用户配置的端点）
-  → 解析 JSON 响应
-  → 将结果写入 SQLite（本地）
-```
-
-关键点：
-- 请求从用户设备直接发送到 OpenAI API
-- API Key 附加在 HTTPS Authorization Header 中
-- **开发者没有服务器可以截获此请求**
-- 请求内容仅包含用户已主动提交的数据
-
-### 3. 数据导出
+### 1. Writing data — never touches the network
 
 ```
-用户点击"导出"
-  → 从 SQLite 读取所有数据
-  → 格式化为 JSON
-  → 写入设备文件系统
-  → 通过系统分享面板发送
+you type  →  validate  →  SQLite INSERT  →  done
 ```
 
-### 4. 数据删除
+`src/database/index.ts` holds every SQL statement in the app. Screens never
+write SQL directly, so this one file is the complete list of what can be
+stored.
+
+### 2. Generating a report — the only outbound request
 
 ```
-用户点击"删除所有数据"
-  → 确认对话框
-  → SQLite DELETE FROM 所有表
-  → 数据不可恢复
+you tap "Generate report"
+  → read the self-portrait versions from SQLite
+  → read fact-log rows inside the selected date range
+  → derive coverage counts (days with entries, entries per topic)
+  → read the API key from Keychain / Keystore
+  → build the prompt
+  → HTTPS POST to the base URL you configured
+  → validate the response against the expected schema
+  → write the report to SQLite
 ```
 
-## 网络请求检查清单
+Read `requestAnalysis` in `src/services/index.ts`. It contains the only
+`fetch` that talks to a network. The prompt is assembled by
+`buildAnalysisPrompt` in the same file, and the fixed instructions live in
+`src/services/analysisPrompt.ts` — both are plain text you can read end to
+end.
 
-App 发起的唯一网络请求：
+> Grepping for `fetch` finds a second hit, in `src/utils/readTextFile.ts`.
+> That one is the **web-only** file reader: browsers hand a picked file to the
+> page as a `blob:` or `data:` URI, and `fetch` is how you read such a URI.
+> It reaches no network and does not exist in the native build, which uses
+> `expo-file-system` instead (`readTextFile.native.ts`). We mention it here so
+> that finding it does not look like something we hid.
 
-| 请求 | 目标 | 触发方式 | 发送内容 |
-|------|------|---------|---------|
-| AI 分析 | api.openai.com | 用户手动点击 | 自我画像摘要 + 事实记录 |
+Key points:
 
-不存在的网络请求：
-- ❌ 数据上传
-- ❌ 遥测/分析
-- ❌ 崩溃报告自动上传
-- ❌ 用户行为追踪
-- ❌ 广告 SDK
+- The request is sent by your device, straight to your provider
+- The API key rides in the `Authorization` header of that request
+- **There is no developer server that could intercept it**
+- The body contains only data you typed, plus counts derived from it
 
-## 代码验证
+### 3. Export and import
 
-由于本 App 完全开源，你可以通过以下方式验证数据流：
+```
+export:  SQLite  →  JSON  →  a file  →  system share sheet
+import:  file  →  validate every field  →  single transaction  →  SQLite
+```
 
-1. 检查 `src/services/index.ts` 中的 `requestAnalysis` 函数 —— 唯一的网络请求
-2. 检查 `src/database/index.ts` —— 所有数据写入均为本地 SQLite 操作
-3. 检查 `App.tsx` 和所有 Screen 组件 —— 不存在埋点或数据收集逻辑
-4. 使用网络代理工具（如 Charles、Proxyman）监控 App 的网络活动
+Import **replaces** everything on the device and runs inside one transaction:
+if any row fails, the whole thing rolls back, so you can never end up with the
+old data deleted and the new data half-written. Validation lives in
+`src/utils/importValidation.ts`.
+
+### 4. Deleting everything
+
+```
+you tap "Delete all local data"
+  → confirmation
+  → DELETE FROM every table
+  → clear the onboarding flag, returning the app to the first self-portrait
+```
+
+Not recoverable. Export first if you might want it back.
+
+## Network request checklist
+
+The complete list of requests this app can make:
+
+| Request | Destination | Trigger | Payload |
+|---|---|---|---|
+| AI analysis | the base URL in Settings | you tap the button | portrait versions, fact-log rows in range, derived counts |
+
+Requests this app does **not** make:
+
+- ❌ Uploading your data anywhere
+- ❌ Telemetry or analytics
+- ❌ Crash reporting
+- ❌ Behavioural tracking
+- ❌ Advertising SDKs
+- ❌ Update or licence checks
+- ❌ Anything at all on launch, on a timer, or in the background
+
+## How to verify
+
+**Read four files.** They are short.
+
+1. `src/services/index.ts` — search for `fetch`. Exactly one network call.
+   (A second `fetch` lives in `src/utils/readTextFile.ts`; it reads a
+   `blob:`/`data:` URI in the web build and touches no network — see above.)
+2. `src/services/analysisPrompt.ts` — the fixed instructions sent to the model.
+3. `src/database/index.ts` — every SQL statement in the app.
+4. `package.json` — the dependency list. No analytics, no crash reporter, no
+   ad SDK.
+
+**Then confirm at runtime.** Point a proxy (Charles, Proxyman, mitmproxy) at
+the device and use the app normally. You should see zero traffic until you tap
+"Generate report", and then exactly one request — to the endpoint you set.
+
+**Or remove the variable entirely.** Set the provider base URL to a model
+running on your own machine (for example `http://localhost:11434/v1`). Then
+nothing leaves your network, and the privacy question is settled by
+construction rather than by trust.

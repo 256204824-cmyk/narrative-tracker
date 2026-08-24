@@ -1,65 +1,117 @@
-# 隐私策略
+# Privacy Policy
 
-## 我们的承诺
+> [简体中文](privacy.zh-Hans.md)
 
-我们不拥有你的数据。我们不读取你的其他 App。我们不截屏。我们不建立服务器保存你的隐私。你提交什么，App 才分析什么。
+## The promise
 
-## 数据收集
+We do not own your data. We do not read your other apps. We do not take
+screenshots. We run no server that holds your private data. We analyse only
+what you choose to submit.
 
-### 我们收集的数据
+## What the app stores
 
-- **自我画像**：你在首次使用时填写的自我评价（评分和文字描述）
-- **事实日志**：你每次主动提交的每日事实记录
-- **AI 分析结果**：基于你的数据生成的叙事-行为对比报告
-- **API Key**：你自愿提供的第三方 AI 服务密钥
+| Data | What it is |
+|---|---|
+| Self-portraits | Your own ratings and short answers about how you see yourself. Every version is kept. |
+| Fact log | The daily entries you type and save |
+| Reports | Narrative-audit results generated from the two above |
+| API key | The third-party AI key you choose to provide |
+| Preferences | Interface language, report range (tier), provider base URL and model name |
 
-### 我们不收集的数据
+## What the app never collects
 
-- 屏幕使用时间
-- 其他 App 的使用数据
-- 位置信息
-- 通讯录
-- 财务信息
-- 浏览器历史
-- 截屏
-- 任何后台行为数据
+- Screen time
+- Data from any other app
+- Location
+- Contacts
+- Health data
+- Financial data
+- Browser history
+- Screenshots
+- Any background activity
 
-## 数据存储
+There is no telemetry, no analytics SDK, no crash reporting, no advertising
+SDK, and no user identifier of any kind. The app does not know who you are
+because there is nothing to know — there is no account.
 
-所有数据（自我画像、事实日志、分析结果、API Key）均**仅存储在用户设备本地**。
+## Where it is stored
 
-- 事实数据：设备 SQLite 数据库
-- API Key：iOS Keychain / Android Keystore 系统安全存储
-- 我们**不运营任何服务器**来存储用户隐私数据
+**Everything stays on your device.**
 
-## 数据传输
+- Entries, portraits and reports: a SQLite database in the app's own storage
+- API key and preferences: the system secure store — iOS Keychain, Android
+  Keystore
 
-- App 仅在用户主动点击「生成分析报告」时，向用户自己填写的第三方 AI 服务（如 OpenAI）发送数据
-- 发送的内容仅限于用户选择的自我画像和事实记录摘要
-- **我们（开发者）不会接收到这些数据**
-- API Key 从设备直接发送到 AI 服务，不经过开发者服务器
+**We operate no server.** There is nothing to breach, subpoena, or sell,
+because there is nothing on our side at all.
 
-## 用户权利
+> **A caveat about the web build.** When run in a browser (development only),
+> the secure store falls back to `localStorage`, which is *not* secure
+> storage. The web build is for development and is not the shipping form of
+> this app. Do not put a real API key into it.
 
-你可以随时：
-- 查看 App 中存储的你的所有数据
-- 以 JSON 格式导出所有数据
-- 一键永久删除所有本地数据
-- 更换或删除你的 API Key
-- 关闭 AI 分析功能
+## What leaves your device, and when
 
-## 第三方服务
+Exactly one outbound request exists in the whole app: the AI analysis call.
+It happens **only when you tap "Generate report"** — never on a timer, never
+in the background, never at launch.
 
-本 App 依赖用户自行提供的第三方 AI API（如 OpenAI API）。用户对该第三方服务的数据处理负有独立责任。我们建议用户阅读相关 AI 服务商的隐私政策。
+It goes to **the endpoint you configured yourself** (Settings → AI provider;
+OpenAI by default). If you point it at a model running on your own machine,
+nothing leaves your network at all.
 
-## 儿童隐私
+The request contains:
 
-本 App 不面向 13 岁以下儿童。
+- Your current self-portrait: four ratings, plus your three short answers
+- Up to five earlier portrait versions: their ratings, dates and three-word
+  descriptions
+- Your fact-log entries within the range you selected — dates, tags, and the
+  text you wrote
+- Counts derived from the above: how many days have entries, how many entries
+  per topic
 
-## 联系我们
+That is all. It is a subset of what you typed. There is no device identifier,
+no account, no metadata about you.
 
-如有隐私相关问题，请通过 GitHub Issues 联系。
+Your API key travels in the `Authorization` header of that same request,
+straight from your device to your provider. **It never passes through any
+server of ours, because we do not have one.**
+
+Your chosen provider will see this content and handles it under **their**
+privacy policy, not ours. Choosing a provider is choosing who to trust with
+that payload — please read theirs.
+
+## What you can do
+
+At any time you can:
+
+- See every piece of data the app holds
+- Export all of it as a JSON file
+- Import a previously exported file — this **replaces** everything currently
+  on the device
+- Delete all local data permanently, which also returns the app to its first
+  self-portrait
+- Change or remove your API key
+- Simply never generate a report, in which case the app makes no network
+  requests at all
+
+Deleting local data cannot be undone. Export a backup first if you may want
+it later.
+
+## Children
+
+This app is not directed at children under 13.
+
+## Verifying any of this
+
+You do not have to take our word for it — that is the point of the app being
+open source. See [data-flow.md](data-flow.md) for exactly which lines of code
+to read and how to confirm with a network proxy.
+
+## Contact
+
+Open an issue on GitHub.
 
 ---
 
-最后更新：2026-08-08
+Last updated: 2026-08-24

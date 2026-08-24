@@ -86,7 +86,7 @@ docs/
 
 我们不拥有你的数据。我们不读取你的其他 App。我们不建立服务器。
 
-详见 [docs/privacy.md](docs/privacy.md) 和 [docs/data-flow.md](docs/data-flow.md)。
+详见 [privacy.zh-Hans.md](privacy.zh-Hans.md) 和 [data-flow.zh-Hans.md](data-flow.zh-Hans.md)。
 
 ## 开源许可
 
