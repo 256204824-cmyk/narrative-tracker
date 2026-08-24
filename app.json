@@ -28,6 +28,12 @@
       "expo-secure-store",
       "expo-sharing",
       "expo-localization"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b526f236-8406-40a0-99e2-bbe554ca3cfc"
+      }
+    },
+    "owner": "ziiqiang"
   }
 }
