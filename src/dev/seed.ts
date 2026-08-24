@@ -5,7 +5,8 @@
 
 import { saveSelfPortrait, saveFactLog, getFactLogCount, deleteAllData } from '../database';
 import { saveTier } from '../services';
-import { DEMO_PORTRAIT, DEMO_FACTS } from './demoData';
+import { demoPortrait, demoFacts } from './demoData';
+import type { Locale } from '../i18n/types';
 
 export interface SeedResult {
   facts: number;
@@ -15,14 +16,16 @@ export interface SeedResult {
 
 /**
  * 清空现有数据后写入一个月的演示记录，并把档位设为 plus
- * （free 只能分析最近 3 天，看不到整月效果）。
+ * （free 窗口较短，看不到整月效果）。
+ *
+ * 文本按传入的语言生成——切换语言后重新载入，演示内容也会跟着换语言。
  */
-export async function seedDemoData(): Promise<SeedResult> {
+export async function seedDemoData(locale: Locale): Promise<SeedResult> {
   await deleteAllData();
-  await saveSelfPortrait(DEMO_PORTRAIT);
+  await saveSelfPortrait(demoPortrait(locale));
 
   // 按日期升序写入，让 created_at 的顺序和 date 一致
-  const sorted = [...DEMO_FACTS].sort((a, b) => a.date.localeCompare(b.date));
+  const sorted = [...demoFacts(locale)].sort((a, b) => a.date.localeCompare(b.date));
   for (const fact of sorted) {
     await saveFactLog(fact);
   }

@@ -16,6 +16,9 @@ import { messagesFor, setActiveLocale, resolveLocaleTag, migrateStoredLocale, lo
 import { SUPPORTED_LOCALES } from '../src/i18n/types.ts';
 import { inspectAnalysis, describe as describeValue, unwrapPayload } from '../src/services/analysisShape.ts';
 import { SYSTEM_PROMPT, REQUIRED_OUTPUT_FIELDS } from '../src/services/analysisPrompt.ts';
+import { demoTextFor } from '../src/dev/demoText/index.ts';
+import { DEMO_SKELETON } from '../src/dev/demoSkeleton.ts';
+import { zhHansDemo } from '../src/dev/demoText/zhHans.ts';
 
 let passed = 0;
 let failed = 0;
@@ -373,6 +376,35 @@ group('提示词与校验器的 schema 必须一致', () => {
   ok('说明了分数是整数', SYSTEM_PROMPT.includes('0 到 100 的整数'));
   // 必须阻止模型照搬输入结构——这正是本次事故的直接诱因
   ok('警告不要照搬输入结构', SYSTEM_PROMPT.includes('不要把它们的结构照搬到输出里'));
+});
+
+// ────────────────────────────────────────────────
+group('演示数据的多语言完整性', () => {
+  const refShape = (o: unknown, prefix = ''): string[] => {
+    if (Array.isArray(o)) return o.flatMap((v, i) => refShape(v, `${prefix}[${i}]`));
+    if (o && typeof o === 'object') {
+      return Object.entries(o).flatMap(([k, v]) => refShape(v, prefix ? `${prefix}.${k}` : k));
+    }
+    return [prefix];
+  };
+  const reference = refShape(zhHansDemo).sort();
+
+  for (const loc of SUPPORTED_LOCALES) {
+    const demo = demoTextFor(loc);
+    check(`${loc} 的演示文本结构与真源一致`, refShape(demo).sort(), reference);
+    check(`${loc} 天数等于骨架`, demo.days.length, DEMO_SKELETON.length);
+    ok(`${loc} 没有空字符串`, refShape(demo).length > 0 &&
+      JSON.stringify(demo).indexOf("''") === -1);
+  }
+
+  // 各语言的首日文本必须互不相同，防止复制粘贴后忘了翻译
+  // 每天填的字段不同（第 3 天就没有 completed），取整天序列化后比对
+  const firstDay = SUPPORTED_LOCALES.map((l) => JSON.stringify(demoTextFor(l).days[0]));
+  check('各语言首日文本互不重复', new Set(firstDay).size, SUPPORTED_LOCALES.length);
+
+  // 骨架里的标签必须都是合法 id，否则统计会漏
+  const tagIds = new Set<string>(TAG_IDS);
+  ok('骨架标签都是合法 id', DEMO_SKELETON.every((d) => d.tags.every((t) => tagIds.has(t))));
 });
 
 console.log(`\n${'═'.repeat(40)}`);

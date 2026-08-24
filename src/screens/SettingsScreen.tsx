@@ -46,7 +46,7 @@ interface Props {
 export default function SettingsScreen({ onReassess }: Props) {
   const t = useT();
   const { apiKey, setApiKey, removeApiKey, tier, setTier, setOnboardingDone,
-    localePreference, setLocalePreference } = useAppState();
+    localePreference, setLocalePreference, locale } = useAppState();
   const [keyInput, setKeyInput] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [factCount, setFactCount] = useState(0);
@@ -167,7 +167,7 @@ export default function SettingsScreen({ onReassess }: Props) {
     if (!ok) return;
     setSeeding(true);
     try {
-      const r = await seedDemoData();
+      const r = await seedDemoData(locale);
       await setOnboardingDone(true);
       setFactCount(r.facts);
       setPortraits(await getAllSelfPortraits());
