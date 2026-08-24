@@ -115,6 +115,18 @@ confidence is exactly the overreach the fourth principle forbids.
 and behaviours, and readers check them. Being inaccurate there is worse than
 saying nothing.
 
+## Phase 0 test builds
+
+`src/services/bundledProvider.ts` supports a build flavour for handing the app
+to testers: set `EXPO_PUBLIC_BUNDLED_AI_KEY` at build time and the app locks
+the provider to a fixed endpoint, uses that key, and hides the API-key and
+provider sections entirely. Leave it unset (the normal case) and nothing
+changes — users bring their own key and pick their own provider.
+
+The key is injected from a gitignored `.env`, never committed. Note that an
+APK is a zip: anyone holding the file can extract the key. Use a dedicated key
+with a spending limit and revoke it when the trial ends.
+
 ## Commands
 
 ```bash

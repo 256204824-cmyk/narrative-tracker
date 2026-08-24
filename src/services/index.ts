@@ -8,6 +8,7 @@ import { tagLabel } from '../constants/questions';
 import { inspectAnalysis, type FieldIssue } from './analysisShape';
 import { SYSTEM_PROMPT, ANALYSIS_JSON_SCHEMA } from './analysisPrompt';
 import { matchPreset } from './providerPresets';
+import { IS_BUNDLED_BUILD, BUNDLED_KEY, BUNDLED_PROVIDER } from './bundledProvider';
 
 /**
  * AI 返回结构不符合预期时抛出，携带足够界面展示的诊断信息。
@@ -41,6 +42,8 @@ export async function saveApiKey(key: string): Promise<void> {
 }
 
 export async function getApiKey(): Promise<string | null> {
+  // 测试包内置 Key，用户不需要（也不能）自己填
+  if (IS_BUNDLED_BUILD) return BUNDLED_KEY;
   return secureGet(API_KEY_STORE_KEY);
 }
 

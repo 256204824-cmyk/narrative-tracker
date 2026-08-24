@@ -1,6 +1,7 @@
 import { secureGet, secureSet } from './storage';
 import type { ProviderConfig } from '../types';
 import { normalizeBaseUrl } from './providerUrl';
+import { IS_BUNDLED_BUILD, BUNDLED_PROVIDER } from './bundledProvider';
 
 // URL 相关的纯逻辑放在 providerUrl.ts（不依赖任何原生模块，可单独测试），
 // 这里再导出一次，调用方无需关心这个拆分。
@@ -21,6 +22,8 @@ export async function saveProviderConfig(config: ProviderConfig): Promise<void> 
 }
 
 export async function getProviderConfig(): Promise<ProviderConfig> {
+  // 测试包锁死 provider，忽略任何本地设置
+  if (IS_BUNDLED_BUILD) return { ...BUNDLED_PROVIDER };
   const [baseUrl, model] = await Promise.all([secureGet(BASE_URL_KEY), secureGet(MODEL_KEY)]);
   return {
     baseUrl: baseUrl?.trim() || DEFAULT_PROVIDER.baseUrl,

@@ -17,6 +17,7 @@ import { validateImport } from '../utils/importValidation';
 import * as DocumentPicker from 'expo-document-picker';
 import { readTextFile } from '../utils/readTextFile';
 import { saveTextFile } from '../utils/saveTextFile';
+import { IS_BUNDLED_BUILD } from '../services/bundledProvider';
 import {
   PROVIDER_PRESETS,
   matchPreset,
@@ -305,7 +306,8 @@ export default function SettingsScreen({ onReassess }: Props) {
           )}
         </View>
 
-        {/* API Key Section */}
+        {/* API Key 与 Provider：测试包内置了 Key 并锁死 provider，整块不显示 */}
+        {!IS_BUNDLED_BUILD && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.settings.keyTitle}</Text>
           <Text style={styles.sectionDesc}>
@@ -379,7 +381,9 @@ export default function SettingsScreen({ onReassess }: Props) {
           )}
         </View>
 
-        {/* Provider Section */}
+        )}
+
+        {!IS_BUNDLED_BUILD && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.settings.providerTitle}</Text>
           <Text style={styles.sectionDesc}>
@@ -506,6 +510,8 @@ export default function SettingsScreen({ onReassess }: Props) {
             </View>
           )}
         </View>
+
+        )}
 
         {/* Self Portrait Section */}
         <View style={styles.section}>

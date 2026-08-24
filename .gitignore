@@ -30,8 +30,10 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# local env files —— 测试包的内置 Key 在这里，公开仓库绝不能收进去
+.env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo

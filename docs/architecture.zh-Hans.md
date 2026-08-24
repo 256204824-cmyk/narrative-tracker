@@ -94,6 +94,16 @@ Web 上会退化为 `localStorage`，那不是安全存储——Web 版是开发
 [data-flow.zh-Hans.md](data-flow.zh-Hans.md) 里点名了具体文件和行为，读者会照着核对。
 写得不准比不写更糟。
 
+## Phase 0 测试包
+
+`src/services/bundledProvider.ts` 提供了一种分发给试用者的构建模式：
+构建时设置 `EXPO_PUBLIC_BUNDLED_AI_KEY`，App 就会锁死 provider、使用该 Key，
+并把 API Key 与 Provider 两个区块整个隐藏。不设置（常规情况）则一切照旧——
+用户自带 Key、自选 provider。
+
+Key 从被 gitignore 的 `.env` 注入，不进仓库。注意 APK 就是个 zip，
+拿到文件的人可以把 Key 提取出来。请用专门新建的 Key、设消费上限、试用结束后吊销。
+
 ## 常用命令
 
 ```bash
