@@ -206,6 +206,26 @@ export const fr: Messages = {
     emptyResponse: (baseUrl: string, model: string) => `L'IA a renvoyé un contenu vide. Fournisseur : ${baseUrl}, modèle : ${model}`,
     badJson: (head: string) => `L'IA n'a pas renvoyé de JSON valide. Début de la réponse : ${head}`,
     badShape: "La réponse de l'IA ne correspond pas au format attendu",
+    notJsonActual: "n'est pas du JSON valide",
+    wholeResponse: '(réponse entière)',
+  },
+
+  diagnostics: {
+    title: 'Diagnostic',
+    show: "Voir ce qui n'a pas correspondu",
+    hide: 'Masquer',
+    fieldsHeader: 'Vérification des champs',
+    colField: 'Champ',
+    colExpected: 'Attendu',
+    colActual: 'Reçu',
+    fatalTag: 'bloquant',
+    recoveredTag: 'valeur par défaut',
+    rawHeader: 'Réponse brute du modèle',
+    rawEmpty: "(le modèle n'a rien renvoyé)",
+    copy: 'Copier le diagnostic',
+    copied: 'Copié dans le presse-papiers',
+    providerHint: (baseUrl: string, model: string) =>
+      `Fournisseur : ${baseUrl}, modèle : ${model}. Si cela se reproduit, le modèle a sans doute du mal à suivre un schéma JSON — essayez-en un plus puissant dans les Réglages.`,
   },
 
   importValidation: {

@@ -206,6 +206,26 @@ export const de: Messages = {
     emptyResponse: (baseUrl: string, model: string) => `Die KI hat leeren Inhalt zurückgegeben. Anbieter: ${baseUrl}, Modell: ${model}`,
     badJson: (head: string) => `Die KI hat kein gültiges JSON zurückgegeben. Anfang der Antwort: ${head}`,
     badShape: 'Die Antwort der KI entspricht nicht dem erwarteten Format',
+    notJsonActual: 'kein gültiges JSON',
+    wholeResponse: '(gesamte Antwort)',
+  },
+
+  diagnostics: {
+    title: 'Diagnose',
+    show: 'Ansehen, was nicht passte',
+    hide: 'Ausblenden',
+    fieldsHeader: 'Feldprüfung',
+    colField: 'Feld',
+    colExpected: 'Erwartet',
+    colActual: 'Erhalten',
+    fatalTag: 'blockierend',
+    recoveredTag: 'Standardwert',
+    rawHeader: 'Rohantwort des Modells',
+    rawEmpty: '(das Modell hat nichts zurückgegeben)',
+    copy: 'Diagnose kopieren',
+    copied: 'In die Zwischenablage kopiert',
+    providerHint: (baseUrl: string, model: string) =>
+      `Anbieter: ${baseUrl}, Modell: ${model}. Wenn das wiederholt passiert, tut sich das Modell vermutlich schwer mit einem JSON-Schema — probiere in den Einstellungen ein stärkeres.`,
   },
 
   importValidation: {

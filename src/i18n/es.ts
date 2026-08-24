@@ -206,6 +206,26 @@ export const es: Messages = {
     emptyResponse: (baseUrl: string, model: string) => `La IA devolvió contenido vacío. Proveedor: ${baseUrl}, modelo: ${model}`,
     badJson: (head: string) => `La IA no devolvió JSON válido. La respuesta empieza por: ${head}`,
     badShape: 'La respuesta de la IA no tiene el formato esperado',
+    notJsonActual: 'no es JSON válido',
+    wholeResponse: '(respuesta completa)',
+  },
+
+  diagnostics: {
+    title: 'Diagnóstico',
+    show: 'Ver qué no coincidió',
+    hide: 'Ocultar',
+    fieldsHeader: 'Comprobación de campos',
+    colField: 'Campo',
+    colExpected: 'Se esperaba',
+    colActual: 'Se recibió',
+    fatalTag: 'bloqueante',
+    recoveredTag: 'valor por defecto',
+    rawHeader: 'Respuesta original del modelo',
+    rawEmpty: '(el modelo no devolvió nada)',
+    copy: 'Copiar diagnóstico',
+    copied: 'Copiado al portapapeles',
+    providerHint: (baseUrl: string, model: string) =>
+      `Proveedor: ${baseUrl}, modelo: ${model}. Si se repite, probablemente al modelo le cueste seguir un esquema JSON: prueba con uno más potente en Ajustes.`,
   },
 
   importValidation: {

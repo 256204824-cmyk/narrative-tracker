@@ -5,6 +5,25 @@ import type { LocalePreference } from '../i18n/types';
 import { migrateStoredLocale } from '../i18n/catalog';
 import { t } from '../i18n';
 import { tagLabel } from '../constants/questions';
+import { inspectAnalysis, type FieldIssue } from './analysisShape';
+
+/**
+ * AI 返回结构不符合预期时抛出，携带足够界面展示的诊断信息。
+ *
+ * 只抛一句「格式不符合预期」的话，用户在真机上无从排查——
+ * 既不知道哪个字段有问题，也看不到模型实际返回了什么。
+ */
+export class AnalysisFormatError extends Error {
+  constructor(
+    readonly issues: FieldIssue[],
+    readonly raw: string,
+    readonly baseUrl: string,
+    readonly model: string
+  ) {
+    super(t().ai.badShape);
+    this.name = 'AnalysisFormatError';
+  }
+}
 
 const API_KEY_STORE_KEY = 'narrative_tracker_api_key';
 const ONBOARDING_STORE_KEY = 'narrative_tracker_onboarding_done';
@@ -260,34 +279,26 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
     .replace(/```$/, '')
     .trim();
 
-  let parsed: AIAnalysisOutput;
+  let parsed: unknown;
   try {
-    parsed = JSON.parse(stripped) as AIAnalysisOutput;
+    parsed = JSON.parse(stripped);
   } catch {
-    throw new Error(t().ai.badJson(stripped.slice(0, 200)));
+    throw new AnalysisFormatError(
+      [{ field: t().ai.wholeResponse, expected: 'JSON', actual: t().ai.notJsonActual, fatal: true }],
+      content,
+      baseUrl,
+      model
+    );
   }
 
-  if (
-    typeof parsed.summary !== 'string' ||
-    typeof parsed.alignment_score !== 'number' ||
-    !Number.isFinite(parsed.alignment_score) ||
-    !Array.isArray(parsed.matched_beliefs) ||
-    !Array.isArray(parsed.gaps)
-  ) {
-    throw new Error(t().ai.badShape);
+  try {
+    return inspectAnalysis(parsed).output;
+  } catch (issues) {
+    if (Array.isArray(issues)) {
+      throw new AnalysisFormatError(issues as FieldIssue[], content, baseUrl, model);
+    }
+    throw issues;
   }
-
-  // 模型可能给出超出 0-100 的分数或非法的置信度，
-  // 这些值会直接进入进度条宽度和数据库，必须在入口处收敛。
-  return {
-    ...parsed,
-    alignment_score: Math.round(Math.min(100, Math.max(0, parsed.alignment_score))),
-    confidence:
-      parsed.confidence === 'high' || parsed.confidence === 'medium' ? parsed.confidence : 'low',
-    insufficient_evidence: Array.isArray(parsed.insufficient_evidence)
-      ? parsed.insufficient_evidence
-      : [],
-    suggested_reflection:
-      typeof parsed.suggested_reflection === 'string' ? parsed.suggested_reflection : '',
-  };
 }
+
+

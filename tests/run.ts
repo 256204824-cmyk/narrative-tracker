@@ -14,6 +14,7 @@ import { zhHans } from '../src/i18n/zhHans.ts';
 import { en } from '../src/i18n/en.ts';
 import { messagesFor, setActiveLocale, resolveLocaleTag, migrateStoredLocale, localeOptions, t as activeMessages } from '../src/i18n/catalog.ts';
 import { SUPPORTED_LOCALES } from '../src/i18n/types.ts';
+import { inspectAnalysis, describe as describeValue, unwrapPayload } from '../src/services/analysisShape.ts';
 
 let passed = 0;
 let failed = 0;
@@ -213,6 +214,97 @@ group('标签 id 与旧数据兼容', () => {
   check('英文界面下 id 显示英文', tagLabel('study'), 'Study');
   // 关键：旧记录存的是中文名，切到英文后也必须显示英文，否则统计会分裂
   check('英文界面下旧数据显示英文', tagLabel('学习'), 'Study');
+});
+
+// ────────────────────────────────────────────────
+group('AI 返回结构检查', () => {
+  const good = {
+    summary: '还行',
+    alignment_score: 72,
+    confidence: 'medium',
+    matched_beliefs: [{ belief: 'a', evidence: 'b', assessment: 'c' }],
+    gaps: [],
+    insufficient_evidence: ['社交没有记录'],
+    suggested_reflection: '下周留意开始时间',
+  };
+
+  const run = (input: unknown) => {
+    try {
+      return { ok: true as const, ...inspectAnalysis(input) };
+    } catch (issues) {
+      return { ok: false as const, issues: issues as Array<{ field: string; fatal: boolean }> };
+    }
+  };
+
+  // 正常输入原样通过
+  const r1 = run(good);
+  ok('正常结构通过', r1.ok);
+  if (r1.ok) {
+    check('无遗留问题', r1.issues.length, 0);
+    check('分数保留', r1.output.alignment_score, 72);
+    check('置信度保留', r1.output.confidence, 'medium');
+  }
+
+  // 分数是字符串——真实 provider 很常见，应当救回来而不是报错
+  const r2 = run({ ...good, alignment_score: '72' });
+  ok('字符串分数被救回', r2.ok);
+  if (r2.ok) {
+    check('字符串分数解析正确', r2.output.alignment_score, 72);
+    check('并记为非致命问题', r2.issues.filter((i) => !i.fatal).length, 1);
+  }
+  const r2b = run({ ...good, alignment_score: '72分' });
+  ok('带单位的分数也能解析', r2b.ok && r2b.output.alignment_score === 72);
+
+  // 分数越界仍要钳制
+  const r3 = run({ ...good, alignment_score: 142 });
+  ok('越界分数钳到 100', r3.ok && r3.output.alignment_score === 100);
+
+  // 分数缺失 = 致命：填 0 会被渲染成红色「差距较大」，等于凭空造结论
+  const r4 = run({ ...good, alignment_score: undefined });
+  ok('缺分数判为致命', !r4.ok);
+  if (!r4.ok) {
+    ok('致命字段指名 alignment_score', r4.issues.some((i) => i.field === 'alignment_score' && i.fatal));
+  }
+  ok('分数为文字时致命', !run({ ...good, alignment_score: '很高' }).ok);
+
+  // 数组字段类型不对 → 兜底成空数组，不阻断
+  const r5 = run({ ...good, matched_beliefs: {}, gaps: null });
+  ok('数组字段异常不阻断', r5.ok);
+  if (r5.ok) {
+    check('matched_beliefs 兜底', r5.output.matched_beliefs.length, 0);
+    check('gaps 兜底', r5.output.gaps.length, 0);
+    ok('两个字段都被记录', r5.issues.filter((i) => !i.fatal).length >= 2);
+  }
+
+  // 三块内容全空 → 报告是白纸，判致命
+  ok('内容全空判为致命', !run({ alignment_score: 50, summary: '', matched_beliefs: [], gaps: [] }).ok);
+
+  // 只要有一块内容就够
+  ok('只有 gaps 也可生成', run({ alignment_score: 50, gaps: [{ belief: 'x', evidence: 'y', assessment: 'z' }] }).ok);
+
+  // 非法 confidence 收敛
+  const r6 = run({ ...good, confidence: 'bogus' });
+  ok('非法置信度收敛为 low', r6.ok && r6.output.confidence === 'low');
+
+  // 条目里字段缺失时不要产生空壳
+  const r7 = run({ ...good, matched_beliefs: [{ belief: 'a' }, {}, 'not an object'] });
+  ok('丢弃空壳条目', r7.ok && r7.output.matched_beliefs.length === 1);
+
+  // 多包一层的返回要能解开
+  check('解开 {analysis:{...}}', (unwrapPayload({ analysis: good }) as any).alignment_score, 72);
+  check('已在顶层则原样返回', (unwrapPayload(good) as any).alignment_score, 72);
+  ok('嵌套结构可直接通过', run({ result: good }).ok);
+
+  // 顶层不是对象
+  ok('顶层是数组判致命', !run([1, 2, 3]).ok);
+  ok('顶层是字符串判致命', !run('nope').ok);
+
+  // describe 要能给出人读得懂的描述
+  check('describe undefined', describeValue(undefined), 'undefined');
+  check('describe 数组', describeValue([1, 2]), 'array(2)');
+  check('describe 字符串', describeValue('hi'), 'string "hi"');
+  check('describe 数字', describeValue(7), 'number 7');
+  ok('describe 对象列出键名', describeValue({ a: 1, b: 2 }).includes('a, b'));
 });
 
 console.log(`\n${'═'.repeat(40)}`);

@@ -205,7 +205,27 @@ export const zhHant: Messages = {
       `AI 請求失敗 (${status})：${body}\n\n目前 provider：${baseUrl}，模型：${model}`,
     emptyResponse: (baseUrl: string, model: string) => `AI 回傳了空內容。目前 provider：${baseUrl}，模型：${model}`,
     badJson: (head: string) => `AI 回傳的不是合法 JSON。原始內容開頭：${head}`,
-    badShape: 'AI 回傳格式不符合預期',
+    badShape: 'AI 回傳的內容不符合預期格式',
+    notJsonActual: '不是合法的 JSON',
+    wholeResponse: '（整體）',
+  },
+
+  diagnostics: {
+    title: '診斷資訊',
+    show: '查看哪裡不符合預期',
+    hide: '收起',
+    fieldsHeader: '欄位檢查',
+    colField: '欄位',
+    colExpected: '期望',
+    colActual: '實際收到',
+    fatalTag: '無法繼續',
+    recoveredTag: '已兜底',
+    rawHeader: '模型原始回傳',
+    rawEmpty: '（模型沒有回傳任何內容）',
+    copy: '複製診斷資訊',
+    copied: '已複製到剪貼簿',
+    providerHint: (baseUrl: string, model: string) =>
+      `目前 provider：${baseUrl}，模型：${model}。若反覆出現，通常是這個模型不擅長依 JSON schema 輸出，可以在設定裡換一個更強的模型試試。`,
   },
 
   importValidation: {

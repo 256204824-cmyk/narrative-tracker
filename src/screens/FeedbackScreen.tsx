@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import GapIndicator from '../components/GapIndicator';
-import { requestAnalysis } from '../services';
+import { requestAnalysis, AnalysisFormatError } from '../services';
+import DiagnosticsPanel from '../components/DiagnosticsPanel';
 import { getAllSelfPortraits, getFactLogsBetween, saveAnalysisResult, getAllAnalyses } from '../database';
 import { today, daysAgo, countDistinctDays } from '../utils/date';
 import { TIER_LIMITS, MIN_DAYS_FOR_ANALYSIS } from '../constants/questions';
@@ -23,6 +24,7 @@ export default function FeedbackScreen() {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formatError, setFormatError] = useState<AnalysisFormatError | null>(null);
   const [result, setResult] = useState<AIAnalysisOutput | null>(null);
   const [previousAnalyses, setPreviousAnalyses] = useState<AnalysisResult[]>([]);
   const [factCount, setFactCount] = useState(0);
@@ -73,6 +75,7 @@ export default function FeedbackScreen() {
   const handleAnalyze = async () => {
     setLoading(true);
     setError(null);
+    setFormatError(null);
     setResult(null);
 
     try {
@@ -130,7 +133,9 @@ export default function FeedbackScreen() {
 
       await loadPrevious();
     } catch (err: any) {
-      setError(err.message || t.feedback.genericFailure);
+      setError(err?.message || t.feedback.genericFailure);
+      // 结构不符时把逐字段诊断留给界面展示，而不是只丢一句错误
+      setFormatError(err instanceof AnalysisFormatError ? err : null);
     } finally {
       setLoading(false);
     }
@@ -176,6 +181,8 @@ export default function FeedbackScreen() {
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
+
+        {formatError && <DiagnosticsPanel error={formatError} />}
 
         {result && (
           <View style={styles.resultSection}>

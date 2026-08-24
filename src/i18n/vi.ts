@@ -206,6 +206,26 @@ export const vi: Messages = {
     emptyResponse: (baseUrl: string, model: string) => `AI trả về nội dung rỗng. Nhà cung cấp: ${baseUrl}, mô hình: ${model}`,
     badJson: (head: string) => `AI không trả về JSON hợp lệ. Phần đầu nội dung: ${head}`,
     badShape: 'Phản hồi của AI không đúng định dạng mong đợi',
+    notJsonActual: 'không phải JSON hợp lệ',
+    wholeResponse: '(toàn bộ phản hồi)',
+  },
+
+  diagnostics: {
+    title: 'Thông tin chẩn đoán',
+    show: 'Xem chỗ nào không khớp',
+    hide: 'Thu gọn',
+    fieldsHeader: 'Kiểm tra trường dữ liệu',
+    colField: 'Trường',
+    colExpected: 'Mong đợi',
+    colActual: 'Nhận được',
+    fatalTag: 'không thể tiếp tục',
+    recoveredTag: 'đã dùng giá trị mặc định',
+    rawHeader: 'Phản hồi gốc của mô hình',
+    rawEmpty: '(mô hình không trả về gì cả)',
+    copy: 'Sao chép thông tin chẩn đoán',
+    copied: 'Đã sao chép vào bộ nhớ tạm',
+    providerHint: (baseUrl: string, model: string) =>
+      `Nhà cung cấp: ${baseUrl}, mô hình: ${model}. Nếu lỗi lặp lại, có thể mô hình này khó tuân theo JSON schema — hãy thử một mô hình mạnh hơn trong Cài đặt.`,
   },
 
   importValidation: {

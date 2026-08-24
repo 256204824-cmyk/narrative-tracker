@@ -206,6 +206,26 @@ export const ja: Messages = {
     emptyResponse: (baseUrl: string, model: string) => `AI の応答が空でした。プロバイダー：${baseUrl}、モデル：${model}`,
     badJson: (head: string) => `AI の応答が正しい JSON ではありません。冒頭：${head}`,
     badShape: 'AI の応答が想定した形式と異なります',
+    notJsonActual: '有効な JSON ではありません',
+    wholeResponse: '（応答全体）',
+  },
+
+  diagnostics: {
+    title: '診断情報',
+    show: 'どこが想定と違うか見る',
+    hide: '閉じる',
+    fieldsHeader: 'フィールド検査',
+    colField: '項目',
+    colExpected: '期待',
+    colActual: '実際',
+    fatalTag: '続行不可',
+    recoveredTag: '既定値で補完',
+    rawHeader: 'モデルの生の応答',
+    rawEmpty: '（モデルは何も返しませんでした）',
+    copy: '診断情報をコピー',
+    copied: 'クリップボードにコピーしました',
+    providerHint: (baseUrl: string, model: string) =>
+      `プロバイダー：${baseUrl}、モデル：${model}。繰り返し起きる場合、そのモデルが JSON スキーマに沿った出力を苦手としている可能性があります。設定でより高性能なモデルをお試しください。`,
   },
 
   importValidation: {

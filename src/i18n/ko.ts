@@ -206,6 +206,26 @@ export const ko: Messages = {
     emptyResponse: (baseUrl: string, model: string) => `AI 응답이 비어 있습니다. 제공자: ${baseUrl}, 모델: ${model}`,
     badJson: (head: string) => `AI 응답이 올바른 JSON이 아닙니다. 시작 부분: ${head}`,
     badShape: 'AI 응답이 예상한 형식과 다릅니다',
+    notJsonActual: '올바른 JSON이 아님',
+    wholeResponse: '(응답 전체)',
+  },
+
+  diagnostics: {
+    title: '진단 정보',
+    show: '무엇이 어긋났는지 보기',
+    hide: '접기',
+    fieldsHeader: '필드 점검',
+    colField: '필드',
+    colExpected: '기대값',
+    colActual: '실제값',
+    fatalTag: '진행 불가',
+    recoveredTag: '기본값 적용',
+    rawHeader: '모델 원본 응답',
+    rawEmpty: '(모델이 아무것도 반환하지 않았습니다)',
+    copy: '진단 정보 복사',
+    copied: '클립보드에 복사했습니다',
+    providerHint: (baseUrl: string, model: string) =>
+      `제공자: ${baseUrl}, 모델: ${model}. 계속 발생한다면 해당 모델이 JSON 스키마를 따르는 데 약할 수 있습니다. 설정에서 더 강력한 모델을 시도해 보세요.`,
   },
 
   importValidation: {

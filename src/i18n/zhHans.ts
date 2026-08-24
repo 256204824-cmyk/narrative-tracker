@@ -241,7 +241,28 @@ export const zhHans = {
     emptyResponse: (baseUrl: string, model: string) =>
       `AI 返回了空内容。当前 provider：${baseUrl}，模型：${model}`,
     badJson: (head: string) => `AI 返回的不是合法 JSON。原始内容开头：${head}`,
-    badShape: 'AI 返回格式不符合预期',
+    badShape: 'AI 返回的内容不符合预期格式',
+    notJsonActual: '不是合法的 JSON',
+    /** 顶层字段名，用于诊断表格里的「（整体）」等占位 */
+    wholeResponse: '（整体）',
+  },
+
+  diagnostics: {
+    title: '诊断信息',
+    show: '查看哪里不符合预期',
+    hide: '收起',
+    fieldsHeader: '字段检查',
+    colField: '字段',
+    colExpected: '期望',
+    colActual: '实际收到',
+    fatalTag: '无法继续',
+    recoveredTag: '已兜底',
+    rawHeader: '模型原始返回',
+    rawEmpty: '（模型没有返回任何内容）',
+    copy: '复制诊断信息',
+    copied: '已复制到剪贴板',
+    providerHint: (baseUrl: string, model: string) =>
+      `当前 provider：${baseUrl}，模型：${model}。如果反复出现，通常是这个模型不擅长按 JSON schema 输出，可以在设置里换一个更强的模型试试。`,
   },
 
   importValidation: {

@@ -206,6 +206,26 @@ export const th: Messages = {
     emptyResponse: (baseUrl: string, model: string) => `AI ส่งเนื้อหาว่างกลับมา ผู้ให้บริการ: ${baseUrl}, โมเดล: ${model}`,
     badJson: (head: string) => `AI ไม่ได้ส่ง JSON ที่ถูกต้องกลับมา ส่วนต้นของเนื้อหา: ${head}`,
     badShape: 'รูปแบบคำตอบของ AI ไม่ตรงกับที่คาดไว้',
+    notJsonActual: 'ไม่ใช่ JSON ที่ถูกต้อง',
+    wholeResponse: '(คำตอบทั้งหมด)',
+  },
+
+  diagnostics: {
+    title: 'ข้อมูลวินิจฉัย',
+    show: 'ดูว่าตรงไหนไม่ตรงกับที่คาดไว้',
+    hide: 'ย่อ',
+    fieldsHeader: 'ตรวจสอบฟิลด์',
+    colField: 'ฟิลด์',
+    colExpected: 'ที่คาดไว้',
+    colActual: 'ที่ได้รับ',
+    fatalTag: 'ไปต่อไม่ได้',
+    recoveredTag: 'ใช้ค่าเริ่มต้นแทน',
+    rawHeader: 'คำตอบดิบจากโมเดล',
+    rawEmpty: '(โมเดลไม่ได้ส่งอะไรกลับมาเลย)',
+    copy: 'คัดลอกข้อมูลวินิจฉัย',
+    copied: 'คัดลอกไปยังคลิปบอร์ดแล้ว',
+    providerHint: (baseUrl: string, model: string) =>
+      `ผู้ให้บริการ: ${baseUrl}, โมเดล: ${model} หากเกิดซ้ำ ๆ มักเป็นเพราะโมเดลนี้ทำตาม JSON schema ได้ไม่ดี ลองเปลี่ยนไปใช้โมเดลที่แรงกว่าในหน้าตั้งค่า`,
   },
 
   importValidation: {

@@ -242,6 +242,26 @@ export const en: Messages = {
       `The AI returned empty content. Provider: ${baseUrl}, model: ${model}`,
     badJson: (head: string) => `The AI did not return valid JSON. Response starts with: ${head}`,
     badShape: 'The AI response did not match the expected format',
+    notJsonActual: 'not valid JSON',
+    wholeResponse: '(whole response)',
+  },
+
+  diagnostics: {
+    title: 'Diagnostics',
+    show: 'See what did not match',
+    hide: 'Hide',
+    fieldsHeader: 'Field check',
+    colField: 'Field',
+    colExpected: 'Expected',
+    colActual: 'Received',
+    fatalTag: 'blocking',
+    recoveredTag: 'defaulted',
+    rawHeader: 'Raw model response',
+    rawEmpty: '(the model returned nothing)',
+    copy: 'Copy diagnostics',
+    copied: 'Copied to clipboard',
+    providerHint: (baseUrl: string, model: string) =>
+      `Provider: ${baseUrl}, model: ${model}. If this keeps happening, the model probably struggles to follow a JSON schema — try a stronger one in Settings.`,
   },
 
   importValidation: {
