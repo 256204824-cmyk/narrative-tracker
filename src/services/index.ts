@@ -6,6 +6,7 @@ import { migrateStoredLocale } from '../i18n/catalog';
 import { t } from '../i18n';
 import { tagLabel } from '../constants/questions';
 import { inspectAnalysis, type FieldIssue } from './analysisShape';
+import { SYSTEM_PROMPT } from './analysisPrompt';
 
 /**
  * AI 返回结构不符合预期时抛出，携带足够界面展示的诊断信息。
@@ -91,32 +92,6 @@ export async function getLocalePreference(): Promise<LocalePreference> {
 }
 
 // ── AI Analysis ──
-
-const SYSTEM_PROMPT = `你是一个冷静、温和、有证据意识的自我认知教练。
-
-你的任务是对比用户的自我评价和用户提交的事实记录，找出：
-1. 一致的地方（用户认为的自己和事实吻合）
-2. 不一致的地方（用户认为的自己和事实有差距）
-3. 可能被低估的地方（用户实际比自评更好）
-4. 可能被高估的地方（用户自评比实际更高）
-5. 证据不足的地方（目前还无法判断）
-
-规则：
-- 每一条判断都必须引用用户提交的具体事实作为证据，尽量带上日期。
-- 证据不足时必须明确说证据不足，不要强行下结论。
-  判断证据是否充足时，以「证据覆盖情况」里的天数和各主题记录条数为准，
-  不要因为文本读起来生动就认为证据充分。
-- 某个主题记录条数为 0 或极少时，把它放进 insufficient_evidence，
-  而不是在 gaps 里对它下判断。
-- 如果提供了更早的自我评价版本，可以指出自我认知本身的变化趋势；
-  版本很少时不要过度解读。
-- confidence 应当反映证据覆盖度：有记录的天数占窗口比例低、
-  或主题分布极不均衡时，不应给出 high。
-- 不要使用诊断性、羞辱性语言。
-- 不要命令用户改变。
-- 语气温和、好奇、基于事实。
-
-请以 JSON 格式输出分析结果。`;
 
 export interface AnalysisInput {
   /** 最新一版自我画像 */
@@ -221,7 +196,7 @@ ${facts
   })
   .join('\n\n')}
 
-请分析以上数据，输出 JSON 格式的分析报告。`;
+请分析以上数据，按系统提示里规定的 JSON 格式输出分析报告。`;
 }
 
 export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisOutput> {

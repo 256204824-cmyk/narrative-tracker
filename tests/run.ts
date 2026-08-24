@@ -15,6 +15,7 @@ import { en } from '../src/i18n/en.ts';
 import { messagesFor, setActiveLocale, resolveLocaleTag, migrateStoredLocale, localeOptions, t as activeMessages } from '../src/i18n/catalog.ts';
 import { SUPPORTED_LOCALES } from '../src/i18n/types.ts';
 import { inspectAnalysis, describe as describeValue, unwrapPayload } from '../src/services/analysisShape.ts';
+import { SYSTEM_PROMPT, REQUIRED_OUTPUT_FIELDS } from '../src/services/analysisPrompt.ts';
 
 let passed = 0;
 let failed = 0;
@@ -305,6 +306,39 @@ group('AI 返回结构检查', () => {
   check('describe 字符串', describeValue('hi'), 'string "hi"');
   check('describe 数字', describeValue(7), 'number 7');
   ok('describe 对象列出键名', describeValue({ a: 1, b: 2 }).includes('a, b'));
+});
+
+// ────────────────────────────────────────────────
+group('提示词与校验器的 schema 必须一致', () => {
+  // 真实事故：prompt 只说「请以 JSON 格式输出」，从未列出字段名，
+  // 校验器却按 PRD 6.2 严格检查。模型只能自己编字段，
+  // 甚至照着输入里「证据覆盖情况」的结构仿了一个 coverage 对象。
+  // 用 stub 测试永远发现不了——stub 按正确格式返回是人为构造的。
+  for (const field of REQUIRED_OUTPUT_FIELDS) {
+    ok(`提示词里出现了 ${field}`, SYSTEM_PROMPT.includes(field));
+  }
+
+  // 提示词里的示例对象本身要能通过校验
+  const example = {
+    summary: '一句话总结',
+    alignment_score: 72,
+    confidence: 'medium',
+    matched_beliefs: [{ belief: 'b', evidence: 'e', assessment: 'a' }],
+    gaps: [{ belief: 'b', evidence: 'e', assessment: 'a' }],
+    insufficient_evidence: ['x'],
+    suggested_reflection: 'r',
+  };
+  let exampleOk = false;
+  try {
+    inspectAnalysis(example);
+    exampleOk = true;
+  } catch {}
+  ok('提示词示例能通过校验器', exampleOk);
+
+  // 提示词必须说清 alignment_score 是数字而不是字符串
+  ok('说明了分数是整数', SYSTEM_PROMPT.includes('0 到 100 的整数'));
+  // 必须阻止模型照搬输入结构——这正是本次事故的直接诱因
+  ok('警告不要照搬输入结构', SYSTEM_PROMPT.includes('不要把它们的结构照搬到输出里'));
 });
 
 console.log(`\n${'═'.repeat(40)}`);
