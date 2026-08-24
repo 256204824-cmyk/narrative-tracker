@@ -6,7 +6,7 @@ import { migrateStoredLocale } from '../i18n/catalog';
 import { t } from '../i18n';
 import { tagLabel } from '../constants/questions';
 import { inspectAnalysis, type FieldIssue } from './analysisShape';
-import { SYSTEM_PROMPT } from './analysisPrompt';
+import { SYSTEM_PROMPT, ANALYSIS_JSON_SCHEMA } from './analysisPrompt';
 
 /**
  * AI 返回结构不符合预期时抛出，携带足够界面展示的诊断信息。
@@ -215,7 +215,21 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
     { role: 'user', content: userPrompt },
   ];
 
-  const call = (useJsonMode: boolean) =>
+  // 三级降级：json_schema 由服务端强制字段名，最可靠；
+  // 不支持的服务退到 json_object（只保证是合法 JSON）；
+  // 再不支持就裸调，靠提示词和解析层兜着。
+  const MODES = ['json_schema', 'json_object', 'none'] as const;
+  type Mode = (typeof MODES)[number];
+
+  const responseFormat = (mode: Mode) => {
+    if (mode === 'json_schema') {
+      return { response_format: { type: 'json_schema', json_schema: ANALYSIS_JSON_SCHEMA } };
+    }
+    if (mode === 'json_object') return { response_format: { type: 'json_object' } };
+    return {};
+  };
+
+  const call = (mode: Mode) =>
     fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -226,15 +240,13 @@ export async function requestAnalysis(input: AnalysisInput): Promise<AIAnalysisO
         model,
         messages,
         temperature: 0.3,
-        // 并非所有 OpenAI-compatible 服务都实现了 json_object 模式，
-        // 不支持的会直接 400，所以失败时降级重试一次。
-        ...(useJsonMode ? { response_format: { type: 'json_object' } } : {}),
+        ...responseFormat(mode),
       }),
     });
 
-  let response = await call(true);
-  if (!response.ok && response.status >= 400 && response.status < 500) {
-    response = await call(false);
+  let response = await call('json_schema');
+  for (let i = 1; i < MODES.length && !response.ok && response.status >= 400 && response.status < 500; i++) {
+    response = await call(MODES[i]);
   }
 
   if (!response.ok) {

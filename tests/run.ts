@@ -300,6 +300,40 @@ group('AI 返回结构检查', () => {
   ok('顶层是数组判致命', !run([1, 2, 3]).ok);
   ok('顶层是字符串判致命', !run('nope').ok);
 
+  // 真机上 deepseek-v4-flash 实际返回过的结构：
+  // consistent / aspect / analysis，evidence 还是数组
+  const deepseekShape = {
+    consistent: [
+      {
+        aspect: '努力、上进、有行动力',
+        evidence: ['07-28 把昨天欠的习题补上了', '07-30 数学第三章终于开始'],
+        analysis: '事实里大量日期的学习任务都在推进',
+      },
+    ],
+    inconsistent: [{ aspect: '我很自律', evidence: ['多次推迟开始'], analysis: '启动成本偏高' }],
+    score: 64,
+    overview: '整体还算一致',
+    suggestion: '下周记录开始时间',
+  };
+  const r8 = run(deepseekShape);
+  ok('真机上出现过的字段名能被映射', r8.ok);
+  if (r8.ok) {
+    check('consistent → matched_beliefs', r8.output.matched_beliefs.length, 1);
+    check('inconsistent → gaps', r8.output.gaps.length, 1);
+    check('score → alignment_score', r8.output.alignment_score, 64);
+    check('overview → summary', r8.output.summary, '整体还算一致');
+    check('suggestion → suggested_reflection', r8.output.suggested_reflection, '下周记录开始时间');
+    check('aspect → belief', r8.output.matched_beliefs[0].belief, '努力、上进、有行动力');
+    check('analysis → assessment', r8.output.matched_beliefs[0].assessment, '事实里大量日期的学习任务都在推进');
+    ok('数组型 evidence 被合并', r8.output.matched_beliefs[0].evidence.includes('07-28'));
+    // 映射必须可见，不能无声改写
+    ok('映射被记录为非致命问题', r8.issues.filter((i) => i.actual.includes('映射')).length >= 4);
+  }
+
+  // 正名优先于别名
+  const r9 = run({ ...good, score: 1, overview: 'x' });
+  ok('正名优先于别名', r9.ok && r9.output.alignment_score === 72 && r9.output.summary === '还行');
+
   // describe 要能给出人读得懂的描述
   check('describe undefined', describeValue(undefined), 'undefined');
   check('describe 数组', describeValue([1, 2]), 'array(2)');

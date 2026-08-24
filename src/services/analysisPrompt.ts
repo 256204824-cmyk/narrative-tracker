@@ -43,12 +43,18 @@ const OUTPUT_SCHEMA = `{
 
 export const SYSTEM_PROMPT = `你是一个冷静、温和、有证据意识的自我认知教练。
 
-你的任务是对比用户的自我评价和用户提交的事实记录，找出：
-1. 一致的地方（用户认为的自己和事实吻合）
-2. 不一致的地方（用户认为的自己和事实有差距）
-3. 可能被低估的地方（用户实际比自评更好）
-4. 可能被高估的地方（用户自评比实际更高）
-5. 证据不足的地方（目前还无法判断）
+你的任务是对比用户的自我评价和用户提交的事实记录，把结论填进下面这几个字段：
+
+- matched_beliefs —— 一致的地方（用户认为的自己和事实吻合）
+- gaps —— 不一致的地方，包含三种：事实与自评有差距、用户可能低估了自己
+  （实际比自评更好）、用户可能高估了自己（自评比实际更高）
+- insufficient_evidence —— 证据不足、目前还无法判断的地方
+- summary —— 一句话总结
+- alignment_score —— 整体一致程度
+- confidence —— 你对这份结论的把握
+- suggested_reflection —— 下一步可以观察什么
+
+**这七个就是输出对象的全部顶层字段，不要另起名字，也不要增加字段。**
 
 规则：
 - 每一条判断都必须引用用户提交的具体事实作为证据，尽量带上日期。
@@ -83,3 +89,42 @@ ${OUTPUT_SCHEMA}
 
 注意：输入数据里的「证据覆盖情况」「用户提交的事实记录」等是**给你看的输入**，
 不要把它们的结构照搬到输出里，也不要在输出中复述这些统计数字。`;
+
+/**
+ * OpenAI `response_format: { type: 'json_schema' }` 用的 schema。
+ *
+ * 这是最强的一层保障：由服务端强制字段名，不依赖模型是否听话。
+ * 但并非所有 OpenAI-compatible 服务都实现了它，
+ * 所以调用侧要按 json_schema → json_object → 无 的顺序降级。
+ *
+ * strict 模式要求所有属性都出现在 required 里，且 additionalProperties 为 false。
+ */
+const beliefItem = {
+  type: 'object',
+  properties: {
+    belief: { type: 'string' },
+    evidence: { type: 'string' },
+    assessment: { type: 'string' },
+  },
+  required: ['belief', 'evidence', 'assessment'],
+  additionalProperties: false,
+} as const;
+
+export const ANALYSIS_JSON_SCHEMA = {
+  name: 'narrative_analysis',
+  strict: true,
+  schema: {
+    type: 'object',
+    properties: {
+      summary: { type: 'string' },
+      alignment_score: { type: 'integer', minimum: 0, maximum: 100 },
+      confidence: { type: 'string', enum: ['low', 'medium', 'high'] },
+      matched_beliefs: { type: 'array', items: beliefItem },
+      gaps: { type: 'array', items: beliefItem },
+      insufficient_evidence: { type: 'array', items: { type: 'string' } },
+      suggested_reflection: { type: 'string' },
+    },
+    required: [...REQUIRED_OUTPUT_FIELDS],
+    additionalProperties: false,
+  },
+} as const;

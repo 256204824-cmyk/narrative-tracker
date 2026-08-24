@@ -53,6 +53,60 @@ export function unwrapPayload(raw: unknown): unknown {
   return raw;
 }
 
+/**
+ * 弱模型常用的近义字段名。
+ *
+ * BYOK 意味着用户会用各种便宜模型，光靠提示词约束太脆——
+ * 实测 deepseek-v4-flash 会把 matched_beliefs 写成 consistent、
+ * assessment 写成 analysis。这里做窄范围映射，
+ * **并且每次映射都记为非致命问题，在诊断面板里明示**，不做无声改写。
+ */
+const TOP_LEVEL_ALIASES: Record<string, string[]> = {
+  summary: ['overview', 'conclusion', 'overall', 'general_summary'],
+  alignment_score: ['score', 'alignment', 'alignment_rate', 'consistency_score'],
+  matched_beliefs: ['consistent', 'matches', 'matched', 'agreements', 'aligned'],
+  gaps: ['inconsistent', 'discrepancies', 'mismatches', 'inconsistencies', 'divergences'],
+  insufficient_evidence: ['insufficient', 'unknown', 'unclear', 'not_enough_evidence'],
+  suggested_reflection: ['suggestion', 'reflection', 'next_step', 'advice'],
+};
+
+const ITEM_ALIASES: Record<string, string[]> = {
+  belief: ['aspect', 'claim', 'statement', 'topic'],
+  evidence: ['facts', 'examples', 'proof'],
+  assessment: ['analysis', 'comment', 'conclusion', 'note'],
+};
+
+/** 按别名补齐缺失的顶层字段，返回补齐后的对象和发生过的映射 */
+function applyAliases(
+  obj: Record<string, unknown>
+): { normalized: Record<string, unknown>; remapped: Array<[string, string]> } {
+  const normalized = { ...obj };
+  const remapped: Array<[string, string]> = [];
+  for (const [canonical, aliases] of Object.entries(TOP_LEVEL_ALIASES)) {
+    if (normalized[canonical] !== undefined) continue;
+    const hit = aliases.find((a) => obj[a] !== undefined);
+    if (hit) {
+      normalized[canonical] = obj[hit];
+      remapped.push([canonical, hit]);
+    }
+  }
+  return { normalized, remapped };
+}
+
+/** 条目里的字段也可能换了名字；evidence 还可能是数组 */
+function pickItemField(item: Record<string, unknown>, canonical: string): string {
+  const candidates = [canonical, ...(ITEM_ALIASES[canonical] ?? [])];
+  for (const key of candidates) {
+    const v = item[key];
+    if (typeof v === 'string' && v) return v;
+    if (Array.isArray(v)) {
+      const parts = v.filter((x): x is string => typeof x === 'string');
+      if (parts.length) return parts.join('；');
+    }
+  }
+  return '';
+}
+
 /** 数字，或能解析成数字的字符串（"72" / "72分" 这类模型很常见） */
 function coerceNumber(v: unknown): number | null {
   if (typeof v === 'number' && Number.isFinite(v)) return v;
@@ -71,9 +125,9 @@ function normalizeBeliefs(v: unknown): Array<MatchedBelief | Gap> {
   return v
     .filter(isObj)
     .map((item) => ({
-      belief: typeof item.belief === 'string' ? item.belief : '',
-      evidence: typeof item.evidence === 'string' ? item.evidence : '',
-      assessment: typeof item.assessment === 'string' ? item.assessment : '',
+      belief: pickItemField(item, 'belief'),
+      evidence: pickItemField(item, 'evidence'),
+      assessment: pickItemField(item, 'assessment'),
     }))
     .filter((b) => b.belief || b.evidence || b.assessment);
 }
@@ -95,12 +149,22 @@ function normalizeStrings(v: unknown): string[] {
  * - 其余字段一律兜底，并记为非致命问题。
  */
 export function inspectAnalysis(raw: unknown): ShapeResult {
-  const parsed = unwrapPayload(raw);
+  const unwrapped = unwrapPayload(raw);
   const issues: FieldIssue[] = [];
 
-  if (!isObj(parsed)) {
-    issues.push({ field: '（顶层）', expected: 'object', actual: describe(parsed), fatal: true });
+  if (!isObj(unwrapped)) {
+    issues.push({ field: '（顶层）', expected: 'object', actual: describe(unwrapped), fatal: true });
     throw issues;
+  }
+
+  const { normalized: parsed, remapped } = applyAliases(unwrapped);
+  for (const [canonical, from] of remapped) {
+    issues.push({
+      field: canonical,
+      expected: canonical,
+      actual: `由 "${from}" 映射而来`,
+      fatal: false,
+    });
   }
 
   const score = coerceNumber(parsed.alignment_score);
